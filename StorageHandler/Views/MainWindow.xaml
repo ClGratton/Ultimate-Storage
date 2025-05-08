@@ -1,0 +1,72 @@
+﻿<Window x:Class="StorageHandler.Views.MainWindow"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:local="clr-namespace:StorageHandler"
+       xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+       mc:Ignorable="d"
+       Title="MainWindow"
+       Height="600" Width="920"
+       WindowStyle="None"
+       AllowsTransparency="True"
+       Background="Transparent">
+
+    <!-- Enable resize support via WindowChrome -->
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="8"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Grid MouseLeftButtonDown="DragWindow">
+        <Border Background="#212529" CornerRadius="20"/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="300*" />
+
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="91" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <Image Source="/Assets/Images/Logo.png" 
+                  Width="310" 
+                  Height="380" 
+                  VerticalAlignment="Center" 
+                  HorizontalAlignment="Center"/>
+
+            <StackPanel Grid.Row="1">
+                <RadioButton Content="Electronics"
+                             Height="50"
+                             GroupName="StorageType"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}" />
+
+                <RadioButton Content="Yu-Gi-Oh"
+                             Height="50"
+                             GroupName="StorageType"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}" />
+
+                <RadioButton Content="Filament"
+                             Height="50"
+                             GroupName="StorageType"
+                             Foreground="White"
+                             FontSize="14"
+                             Style="{StaticResource MenuButtonTheme}" />
+
+            </StackPanel>
+
+            <TextBox Grid.Column="1" 
+                     Grid.Row="0"                   
+                     VerticalContentAlignment="Center"
+                     
+                     Margin="20,30,20,30" 
+                     Style="{StaticResource TextboxTheme}" Tag="Search through the whole storage..." />
+
+        </Grid>
+    </Grid>
+</Window>
