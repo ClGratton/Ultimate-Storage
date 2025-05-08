@@ -1,0 +1,25 @@
+﻿{
+  "electronics_items": [
+    {
+      "id": "res_001",
+      "name": "Resistor",
+      "value": "220Ω",
+      "quantity": 100,
+      "location": "Box1/CompartmentA"
+    },
+    {
+      "id": "cap_001",
+      "name": "Capacitor",
+      "value": "10μF",
+      "quantity": 50,
+      "location": "Box1/CompartmentB"
+    },
+    {
+      "id": "led_001",
+      "name": "LED",
+      "value": "Red",
+      "quantity": 200,
+      "location": "Box2/TopShelf"
+    }
+  ]
+}
