@@ -44,7 +44,7 @@
                              FontSize="14"
                              Style="{StaticResource MenuButtonTheme}" />
 
-                <RadioButton Content="Yu-Gi-Oh"
+                <RadioButton Content="Yu-Gi-Oh!"
                              Height="50"
                              GroupName="StorageType"
                              Foreground="White"
@@ -63,9 +63,28 @@
             <TextBox Grid.Column="1" 
                      Grid.Row="0"                   
                      VerticalContentAlignment="Center"
-                     
                      Margin="20,30,20,30" 
-                     Style="{StaticResource TextboxTheme}" Tag="Search through the whole storage..." />
+                     Style="{StaticResource TextboxTheme}" 
+                     Tag="Search through the whole storage..." />
+
+            <!-- Storage Grid -->
+            <Canvas x:Name="StorageGrid" 
+                    Grid.Column="1" 
+                    Grid.Row="1" 
+                    Background="Transparent" 
+                    Margin="40,10,0,0">  
+               <!-- Storage boxes will be dynamically added here -->  
+            </Canvas>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="10">
+                <Button Content="Edit Color" Click="EditColor_Click" Margin="5" ToolTip="Edit Color Button Clicked"/>
+                <Button Content="Save Changes" Click="SaveChanges_Click" Margin="5"/>
+                <Button Content="Revert Changes" Click="RevertChanges_Click" Margin="5"/>
+            </StackPanel>
+
+
+
+
+
 
         </Grid>
     </Grid>

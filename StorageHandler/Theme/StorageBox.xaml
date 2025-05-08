@@ -1,0 +1,17 @@
+<UserControl x:Class="StorageHandler.Controls.StorageBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="{Binding BoxHeight}"
+             Width="{Binding BoxWidth}">
+	<Border BorderBrush="#353340"
+            BorderThickness="4"
+            CornerRadius="10"
+            Background="{Binding Background}">
+		<TextBlock Text="{Binding BoxLabel}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="Black"
+                   FontWeight="Bold"/>
+	</Border>
+</UserControl>
+

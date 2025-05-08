@@ -1,0 +1,25 @@
+{
+  "yugioh_items": [
+    {
+      "id": "card_001",
+      "name": "Dark Magician",
+      "type": "Monster",
+      "rarity": "Ultra Rare",
+      "location": "Binder1/Page1"
+    },
+    {
+      "id": "card_002",
+      "name": "Blue-Eyes White Dragon",
+      "type": "Monster",
+      "rarity": "Secret Rare",
+      "location": "Binder1/Page2"
+    },
+    {
+      "id": "card_003",
+      "name": "Mirror Force",
+      "type": "Trap",
+      "rarity": "Rare",
+      "location": "Binder2/Page5"
+    }
+  ]
+}

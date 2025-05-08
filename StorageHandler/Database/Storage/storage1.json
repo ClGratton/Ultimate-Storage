@@ -1,0 +1,40 @@
+{
+  "name": "Root",
+  "type": "container",
+  "allowed": [ "electronics" ],
+  "depth": 0,
+  "position": [ 0, 0 ],
+  "size": [ 1, 1 ],
+  "children": [
+    {
+      "name": "Box1",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "position": [ 0, 0 ],
+      "size": [ 1, 2 ],
+      "color": "#FFB3BA",
+      "children": []
+    },
+    {
+      "name": "Box2",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "position": [ 1, 0 ],
+      "size": [ 1, 1 ],
+      "color": "#FFDFBA",
+      "children": []
+    },
+    {
+      "name": "Box3",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "position": [ 1, 1 ],
+      "size": [ 1, 1 ],
+      "color": "#BAE1FF",
+      "children": []
+    }
+  ]
+}
