@@ -26,7 +26,7 @@
 
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="91" />
+                <RowDefinition Height="110" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
@@ -64,9 +64,17 @@
                      Grid.Row="0"                   
                      VerticalContentAlignment="Center"
                      
-                     Margin="20,30,20,30" 
+                     Margin="20,40,20,40" 
                      Style="{StaticResource TextboxTheme}" Tag="Search through the whole storage..." />
-
+            <!-- Storage Grid -->
+            <Canvas x:Name="StorageGrid" 
+                    Grid.Column="1" 
+                    Grid.Row="1" 
+                    Background="Transparent" 
+                    Margin="40,10,0,0">
+                <!-- Storage boxes will be dynamically added here -->
+            </Canvas>
+            
         </Grid>
     </Grid>
 </Window>

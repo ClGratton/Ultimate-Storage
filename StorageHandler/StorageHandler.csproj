@@ -14,16 +14,20 @@
 
   <ItemGroup>
     <Folder Include="Assets\Fonts\" />
-    <Folder Include="Models\" />
-    <Folder Include="Database\" />
+    <Folder Include="Database\Storage\" />
     <Folder Include="Resources\" />
-    <Folder Include="Scritps\" />
     <Folder Include="Services\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\Images\Logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Database\Storage\storage1.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

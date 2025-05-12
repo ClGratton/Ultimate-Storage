@@ -1,0 +1,84 @@
+{
+  "name": "Root",
+  "type": "container",
+  "allowed": [ "electronics" ],
+  "depth": 0,
+  "color": "#F8F9FA",
+  "position": [ 0, 0 ],
+  "size": [ 2, 2 ],
+  "children": [
+    {
+      "name": "TallBox",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "color": "#FFE5B4",
+      "position": [ 0, 0 ],
+      "size": [ 1, 2 ],
+      "children": [
+        {
+          "name": "TopCompartment",
+          "type": "container",
+          "allowed": [ "electronics" ],
+          "depth": 2,
+          "color": "#E6F2FF",
+          "position": [ 0, 0 ],
+          "size": [ 1, 1 ],
+          "children": []
+        },
+        {
+          "name": "BottomCompartment",
+          "type": "container",
+          "allowed": [ "electronics" ],
+          "depth": 2,
+          "color": "#D8F8E1",
+          "position": [ 0, 1 ],
+          "size": [ 1, 1 ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "TopRightBox",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "color": "#FFDFD3",
+      "position": [ 1, 0 ],
+      "size": [ 1, 1 ],
+      "children": [
+        {
+          "name": "InnerShelf",
+          "type": "container",
+          "allowed": [ "electronics" ],
+          "depth": 2,
+          "color": "#FFF9C4",
+          "position": [ 0, 0 ],
+          "size": [ 1, 1 ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "BottomRightBox",
+      "type": "container",
+      "allowed": [ "electronics" ],
+      "depth": 1,
+      "color": "#FFD6E0",
+      "position": [ 1, 1 ],
+      "size": [ 1, 1 ],
+      "children": [
+        {
+          "name": "Storage",
+          "type": "container",
+          "allowed": [ "electronics" ],
+          "depth": 2,
+          "color": "#E6E6FA",
+          "position": [ 0, 0 ],
+          "size": [ 1, 1 ],
+          "children": []
+        }
+      ]
+    }
+  ]
+}
