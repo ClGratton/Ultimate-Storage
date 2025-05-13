@@ -71,7 +71,9 @@
                     Grid.Column="1" 
                     Grid.Row="1" 
                     Background="Transparent" 
-                    Margin="40,10,0,0">
+                    Margin="40,10,0,0"
+                    MouseRightButtonUp="StorageGrid_MouseRightButtonUp">
+                
                 <!-- Storage boxes will be dynamically added here -->
             </Canvas>
             

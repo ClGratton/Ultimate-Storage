@@ -60,6 +60,27 @@ namespace StorageHandler.Scripts {
                 _boxResizer.ClearHandles(_storageGrid);
             }
         }
+
+        public StorageContainer GetRootContainer() {
+            return _rootContainer;
+        }
+
+        public void RefreshBoxes() {
+            // Clear the current UI
+            ClearStorageGrid();
+
+            // Re-add all boxes from the root container
+            if (_rootContainer != null) {
+                foreach (var container in _rootContainer.Children) {
+                    if (container.Depth == 1) { // Only display top-level containers
+                        AddStorageBox(container);
+                    }
+                }
+            }
+        }
+
+
+
     }
 }
 

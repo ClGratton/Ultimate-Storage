@@ -22,6 +22,14 @@ namespace StorageHandler.Views {
         private readonly StorageDisplayManager _displayManager;
         private readonly ColorEditor _colorEditor;
         private StorageContainer? _rootContainer;
+        private BoxResizer _boxResizer;
+
+        private bool _isBoxDragging = false;
+        private Point _boxDragStartPoint;
+        private Border _draggedBox;
+        private StorageContainer _draggedContainer;
+        private int[] _originalBoxPosition;
+        private Canvas _dragCanvas;
 
         public MainWindow() {
             InitializeComponent();
@@ -111,9 +119,117 @@ namespace StorageHandler.Views {
             }
         }
 
+        private void StorageGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+            Debug.WriteLine("Right click detected on StorageGrid");
+            var point = e.GetPosition(StorageGrid);
+
+            // First check if we clicked on a box
+            var hitElement = StorageGrid.InputHitTest(point) as UIElement;
+            var border = FindParentBorder(hitElement);
+
+            // If we clicked on a box, show delete context menu
+            if (border != null && border.DataContext is StorageContainer container) {
+                ShowDeleteBoxMenu(border, container, point);
+                e.Handled = true;
+                return;
+            }
+
+            // Otherwise, check if we can add a box at the clicked position
+            int gridX = (int)(point.X / BoxResizer.CanvasScaleFactor);
+            int gridY = (int)(point.Y / BoxResizer.CanvasScaleFactor);
+
+            // Check if space is free (no boxes at this grid position)
+            bool spaceOccupied = _rootContainer.Children
+                .Any(box =>
+                    gridX >= box.Position[0] &&
+                    gridX < box.Position[0] + box.Size[0] &&
+                    gridY >= box.Position[1] &&
+                    gridY < box.Position[1] + box.Size[1]);
+
+            if (!spaceOccupied) {
+                // Show context menu for adding a box rather than immediately creating one
+                ShowAddBoxMenu(point, gridX, gridY);
+            }
+
+            e.Handled = true;
+        }
+
+
+        private void ShowAddBoxMenu(Point point, int gridX, int gridY) {
+            var contextMenu = new ContextMenu();
+            var menuItem = new MenuItem { Header = "Add Box" };
+            menuItem.Click += (s, e) => AddNewBox(gridX, gridY);
+            contextMenu.Items.Add(menuItem);
+            contextMenu.PlacementTarget = StorageGrid;
+            contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+            contextMenu.IsOpen = true;
+        }
+
+        private Border FindParentBorder(UIElement element) {
+            while (element != null && !(element is Canvas) && !(element is Border)) {
+                element = VisualTreeHelper.GetParent(element) as UIElement;
+            }
+            return element as Border;
+        }
+
+        private void ShowDeleteBoxMenu(Border border, StorageContainer container, Point point) {
+            var contextMenu = new ContextMenu();
+            var menuItem = new MenuItem { Header = "Delete Box" };
+            menuItem.Click += (s, e) => DeleteBox(container);
+            contextMenu.Items.Add(menuItem);
+            contextMenu.PlacementTarget = border;
+            contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+            contextMenu.IsOpen = true;
+        }
+
+        private void DeleteBox(StorageContainer container) {
+            // Debug to track the deletion process
+            Debug.WriteLine($"DeleteBox: Starting delete of container {container.Name}");
+
+            // Get the actual instance from the root container
+            var containerToRemove = _rootContainer.Children.FirstOrDefault(c => c.Name == container.Name);
+            if (containerToRemove != null) {
+                // Remove from data model
+                _rootContainer.Children.Remove(containerToRemove);
+
+                // Save changes to temporary file
+                _storageLoader.SaveTemporary(_rootContainer);
+                Debug.WriteLine($"DeleteBox: Saved to temp file after removing {container.Name}");
+
+                // Clear the canvas before redrawing
+                _boxManager.ClearStorageGrid();
+                Debug.WriteLine("DeleteBox: Cleared storage grid");
+
+                // Use the existing display refresh method
+                LoadAndDisplayStorage();
+                Debug.WriteLine("DeleteBox: Completed refresh after deletion");
+            } else {
+                Debug.WriteLine($"DeleteBox: Error - Container {container.Name} not found in root container");
+            }
+        }
+
+
+
+
+        private void AddNewBox(int gridX, int gridY) {
+            // Create a new container with default properties
+            var newBox = new StorageContainer {
+                Name = "Box_" + Guid.NewGuid().ToString("N").Substring(0, 8),
+                Position = new[] { gridX, gridY },
+                Size = new[] { 1, 1 },
+                Color = "#808080", // Default gray color
+                Depth = 1 // Set to 1 since we're only displaying top-level containers (depth 1)
+            };
+
+            // Add to root container and save
+            _rootContainer.Children.Add(newBox);
+            _storageLoader.SaveTemporary(_rootContainer);
+
+            // Refresh UI
+            LoadAndDisplayStorage();
+        }
 
 
     }
 }
-
 
