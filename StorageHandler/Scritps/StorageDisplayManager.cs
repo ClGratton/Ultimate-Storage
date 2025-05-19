@@ -21,7 +21,8 @@ namespace StorageHandler.Scripts {
             if (_rootContainer != null) {
                 _storageGrid.Children.Clear(); // Clear the UI
                 foreach (var child in _rootContainer.Children) {
-                    if (child.Depth == 1) { // Only display top-level containers
+                    // Show containers at depth 1 (top level)
+                    if (child.Depth == 1) {
                         _boxManager.AddStorageBox(child);
                     }
                 }
@@ -30,6 +31,7 @@ namespace StorageHandler.Scripts {
                 Application.Current.Shutdown(); // Exit the application cleanly if loading fails
             }
         }
+
 
         public StorageContainer GetCurrentStorage() {
             return _rootContainer;

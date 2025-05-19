@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace StorageHandler.Scripts {
     public class StorageBoxManager {
@@ -11,6 +12,7 @@ namespace StorageHandler.Scripts {
         private StorageLoader _storageLoader;
         private StorageContainer _rootContainer;
         private StorageBoxDrag _boxDrag;
+        public event MouseButtonEventHandler Box_MouseDoubleClick;
 
         public StorageBoxManager(Canvas storageGrid) {
             _storageGrid = storageGrid;
@@ -58,6 +60,13 @@ namespace StorageHandler.Scripts {
             // Add mouse event handlers for drag-and-drop functionality
             _boxDrag.AttachDragHandlers(box, container);
 
+            // Add this line for double-click handling
+            box.MouseLeftButtonDown += (sender, e) => {
+                if (e.ClickCount == 2) {
+                    Box_MouseDoubleClick?.Invoke(sender, e);
+                }
+            };
+
             _storageGrid.Children.Add(box);
 
             // Add resize handle if this is a top-level container (depth 1)
@@ -101,5 +110,11 @@ namespace StorageHandler.Scripts {
                 }
             }
         }
+        public void AddResizeHandleToBox(Border box, StorageContainer container) {
+            if (_boxResizer != null) {
+                _boxResizer.AttachResizeHandle(box, container);
+            }
+        }
+
     }
 }
