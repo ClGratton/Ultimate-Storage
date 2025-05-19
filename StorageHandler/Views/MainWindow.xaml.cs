@@ -290,10 +290,10 @@ namespace StorageHandler.Views {
                 Position = new[] { gridX, gridY },
                 Size = new[] { 1, 1 },
                 Color = "#808080", // Default gray color
-                Depth = 1 // Always set to 1 initially to ensure resize handles are attached
+                Depth = _currentDepth // Always use the current depth level
             };
 
-            Debug.WriteLine($"AddNewBox: Created new box {newBox.Name} at position [{gridX},{gridY}] with depth 1");
+            Debug.WriteLine($"AddNewBox: Created new box {newBox.Name} at position [{gridX},{gridY}] with depth {_currentDepth}");
 
             // Add to current container instead of always to root
             if (_currentDepth == 1) {
@@ -313,31 +313,24 @@ namespace StorageHandler.Views {
                 // At root level, use standard display method
                 LoadAndDisplayStorage();
             } else {
-                // Inside a container, add directly but ensure resize handles
+                // Inside a container, we need to handle resize differently
+
+                // Temporarily set depth to 1 to ensure resize handles are created
+                int originalDepth = newBox.Depth;
+                newBox.Depth = 1;
+
+                // Add the box to UI
                 _boxManager.AddStorageBox(newBox);
 
-                // Use the BoxManager's methods to add resize handles
-                // This is safer than trying to use _boxResizer directly
-                try {
-                    Debug.WriteLine($"AddNewBox: Adding box to display with BoxManager");
-                    foreach (UIElement element in StorageGrid.Children) {
-                        if (element is Border border && border.DataContext is StorageContainer sc && sc.Name == newBox.Name) {
-                            // Get the BoxResizer from BoxManager instead of using _boxResizer directly
-                            _boxManager.AddResizeHandleToBox(border, newBox);
-                            Debug.WriteLine($"AddNewBox: Added resize handle via BoxManager for {newBox.Name}");
-                            break;
-                        }
-                    }
-                } catch (Exception ex) {
-                    Debug.WriteLine($"AddNewBox: Error attaching resize handle - {ex.Message}");
-                }
-            }
+                // Restore the proper depth after box is added to UI
+                newBox.Depth = originalDepth;
 
-            // Now restore the proper depth if needed
-            if (_currentDepth > 1) {
-                newBox.Depth = _currentDepth;
+                // No need to manually find the box and add resize handles - the BoxManager
+                // has already done this when it saw depth 1 during AddStorageBox
+                Debug.WriteLine($"AddNewBox: Added box with proper depth {originalDepth}");
             }
         }
+
 
 
 
@@ -355,12 +348,18 @@ namespace StorageHandler.Views {
 
         private void NavigateToContainer(StorageContainer container) {
             Debug.WriteLine($"NavigateToContainer: Navigating into container {container.Name}");
+            Debug.WriteLine($"NAVIGATION DEBUG: CURRENT LEVEL = {_currentDepth}, TARGET = {container.Name}");
 
-            // Remove this check to allow navigation into empty containers
-            // if (container.Children.Count == 0) {
-            //     Debug.WriteLine($"NavigateToContainer: Container {container.Name} has no children - navigation aborted");
-            //     return; // Don't navigate if there are no children
-            // }
+            // Print parent-child relationships
+            Debug.WriteLine("NAVIGATION DEBUG: CONTAINER HIERARCHY:");
+            if (_currentActiveContainer != null) {
+                Debug.WriteLine($"  Current Container: {_currentActiveContainer.Name}");
+                Debug.WriteLine($"  Parent Container: {_currentParentContainer?.Name ?? "null"}");
+                Debug.WriteLine($"  Children Count: {_currentActiveContainer.Children.Count}");
+                foreach (var child in _currentActiveContainer.Children) {
+                    Debug.WriteLine($"    - Child: {child.Name} at [{child.Position[0]},{child.Position[1]}], size [{child.Size[0]},{child.Size[1]}]");
+                }
+            }
 
             // Reload from storage to ensure we have the latest data
             Debug.WriteLine("NavigateToContainer: Reloading from storage...");
@@ -375,10 +374,13 @@ namespace StorageHandler.Views {
             }
             Debug.WriteLine($"NavigateToContainer: Found container {updatedContainer.Name} with {updatedContainer.Children.Count} children");
 
-            // Store current container as parent for back navigation
-            _currentParentContainer = _currentActiveContainer ?? _rootContainer;
+            // Find the parent container BEFORE setting the current container
+            _currentParentContainer = FindParentContainer(_rootContainer, updatedContainer.Name);
+            Debug.WriteLine($"NavigateToContainer: Found parent container: {_currentParentContainer?.Name ?? "null"}");
+
+            // Store current active container as the container we're navigating into
             _currentActiveContainer = updatedContainer;
-            Debug.WriteLine($"NavigateToContainer: Set parent to {_currentParentContainer?.Name}, active to {_currentActiveContainer.Name}");
+            Debug.WriteLine($"NavigateToContainer: Set active to {_currentActiveContainer.Name}");
 
             // Clear the canvas
             _boxManager.ClearStorageGrid();
@@ -390,17 +392,23 @@ namespace StorageHandler.Views {
 
             // Display the container's children (if any)
             Debug.WriteLine($"NavigateToContainer: Adding {_currentActiveContainer.Children.Count} children to display");
-            foreach (var child in _currentActiveContainer.Children) {
-                Debug.WriteLine($"NavigateToContainer: Adding child {child.Name} with depth {child.Depth} → {_currentDepth + 1}");
+            if (_currentActiveContainer.Children.Count > 0) {
+                Debug.WriteLine("CONTAINER CONTENTS:");
+                foreach (var child in _currentActiveContainer.Children) {
+                    Debug.WriteLine($"  - {child.Name} at [{child.Position[0]},{child.Position[1]}], size [{child.Size[0]},{child.Size[1]}], color {child.Color}");
 
-                // Critical fix: When navigating down, we need to ensure boxes at this level get resize handles
-                child.Depth = 1; // Temporarily set to 1 to ensure resize handles are attached
-                _boxManager.AddStorageBox(child);
+                    // Critical fix: When navigating down, we need to ensure boxes at this level get resize handles
+                    child.Depth = 1; // Temporarily set to 1 to ensure resize handles are attached
+                    _boxManager.AddStorageBox(child);
+                }
+            } else {
+                Debug.WriteLine("CONTAINER IS EMPTY - No children to display");
             }
 
             // Increment depth after navigating down
             _currentDepth++;
             Debug.WriteLine($"NavigateToContainer: New depth is {_currentDepth}");
+            Debug.WriteLine($"STORAGE PATH: {(_currentParentContainer != null ? _currentParentContainer.Name + " > " : "")}{_currentActiveContainer.Name}");
 
             // Update window title to show current location
             UpdateCurrentLocationDisplay(_currentActiveContainer.Name);
@@ -412,96 +420,111 @@ namespace StorageHandler.Views {
             }
         }
 
-
-
-
-
         private void NavigateUp() {
+            Debug.WriteLine("NAVIGATION DEBUG: ATTEMPTING TO NAVIGATE UP");
+            Debug.WriteLine($"NAVIGATION DEBUG: CURRENT LEVEL = {_currentDepth}, CURRENT CONTAINER = {_currentActiveContainer?.Name ?? "null"}");
+            Debug.WriteLine($"NAVIGATION DEBUG: PARENT CONTAINER = {_currentParentContainer?.Name ?? "null"}");
+
             if (_currentDepth <= 1) {
                 Debug.WriteLine("NavigateUp: Already at top level");
+                Debug.WriteLine($"NAVIGATION DEBUG: CANNOT NAVIGATE UP - Depth={_currentDepth}");
                 return; // Already at top level
             }
 
+            // For depth 2, we're navigating up to the root
+            bool navigatingToRoot = (_currentDepth == 2);
+
             Debug.WriteLine($"NavigateUp: Navigating up from depth {_currentDepth} to {_currentDepth - 1}");
-            Debug.WriteLine($"NavigateUp: Current active container: {_currentActiveContainer?.Name}, Parent: {_currentParentContainer?.Name}");
+            Debug.WriteLine($"NavigateUp: Current active container: {_currentActiveContainer?.Name}, Parent: {_currentParentContainer?.Name ?? "ROOT"}");
 
             // Save any changes that might have been made at current level
             _storageLoader.SaveTemporary(_rootContainer);
             Debug.WriteLine("NavigateUp: Saved current state to temporary file");
 
-            // Decrement depth before navigating up
-            _currentDepth--;
-            Debug.WriteLine($"NavigateUp: New depth: {_currentDepth}");
-
-            // Clear the canvas
-            _boxManager.ClearStorageGrid();
-            Debug.WriteLine("NavigateUp: Cleared storage grid");
-
-            // Important: Store references before reloading
+            // Store references before reloading
             string activeContainerName = _currentActiveContainer?.Name;
-            string parentContainerName = _currentParentContainer?.Name;
 
-            // Reload instead of using existing references which might be stale
+            // Detailed debug for storage hierarchy before navigation
+            Debug.WriteLine("STORAGE HIERARCHY BEFORE NAVIGATION:");
+            PrintContainerHierarchy(_rootContainer, 0);
+
+            // Reload from storage to ensure we have the latest data
             _rootContainer = _storageLoader.LoadStorage();
             Debug.WriteLine($"NavigateUp: Root container reloaded, has {_rootContainer.Children.Count} children at top level");
 
-            // Navigate to the correct container level
-            if (_currentDepth == 1) {
-                Debug.WriteLine("NavigateUp: At depth 1, showing root level");
+            // Handle navigation based on current depth
+            if (navigatingToRoot) {
+                // When navigating to root level
                 _currentActiveContainer = _rootContainer;
                 _currentParentContainer = null;
+                Debug.WriteLine("NavigateUp: Navigating to root level");
+            } else if (_currentParentContainer != null) {
+                // When navigating to a non-root parent
+                string parentName = _currentParentContainer.Name;
+                _currentActiveContainer = FindContainerByName(_rootContainer, parentName);
+                _currentParentContainer = FindParentContainer(_rootContainer, parentName);
 
-                _boxManager.InitializeResizer(_storageLoader, _rootContainer);
-                LoadAndDisplayStorage();
+                Debug.WriteLine($"NavigateUp: Set active to {_currentActiveContainer?.Name}, new parent to {_currentParentContainer?.Name ?? "ROOT"}");
             } else {
-                Debug.WriteLine($"NavigateUp: Still inside container at depth {_currentDepth}");
+                // Fallback - should not happen with proper parent tracking
+                Debug.WriteLine("NavigateUp: NAVIGATION ERROR - No parent found but not at root level");
+                _currentActiveContainer = _rootContainer;
+                _currentParentContainer = null;
+            }
 
-                // Find the parent container in the reloaded hierarchy
-                if (!string.IsNullOrEmpty(parentContainerName)) {
-                    _currentActiveContainer = FindContainerByName(_rootContainer, parentContainerName);
-                    Debug.WriteLine($"NavigateUp: Found parent container {_currentActiveContainer?.Name} in hierarchy");
+            // Now that we've updated containers, decrease depth
+            _currentDepth--;
+            Debug.WriteLine($"NavigateUp: New depth: {_currentDepth}");
 
-                    if (_currentActiveContainer != null) {
-                        // Re-initialize with the parent container
-                        _boxManager.InitializeResizer(_storageLoader, _rootContainer); // Use root for initialization
+            // Clear and redraw the canvas
+            _boxManager.ClearStorageGrid();
+            Debug.WriteLine("NavigateUp: Cleared storage grid");
 
-                        // Display the parent's children
-                        Debug.WriteLine($"NavigateUp: Adding {_currentActiveContainer.Children.Count} children to display");
-                        foreach (var child in _currentActiveContainer.Children) {
-                            // Set depth to 1 temporarily for resize handles
-                            int originalDepth = child.Depth;
-                            child.Depth = 1;
-                            _boxManager.AddStorageBox(child);
-                            child.Depth = originalDepth;
-                        }
+            // Display the current container's children
+            if (_currentActiveContainer != null) {
+                // Re-initialize with the current container
+                _boxManager.InitializeResizer(_storageLoader, _currentActiveContainer);
 
-                        // Find the next parent up for further navigation
-                        _currentParentContainer = FindParentContainer(_rootContainer, _currentActiveContainer.Name);
-                    } else {
-                        // Fallback if parent not found
-                        _currentActiveContainer = _rootContainer;
-                        _currentParentContainer = null;
-                        _currentDepth = 1;
-                        LoadAndDisplayStorage();
-                    }
-                } else {
-                    // Fallback if no parent name
-                    _currentActiveContainer = _rootContainer;
-                    _currentDepth = 1;
-                    LoadAndDisplayStorage();
+                // Display the current container's children
+                Debug.WriteLine($"NavigateUp: Adding {_currentActiveContainer.Children.Count} children to display");
+                Debug.WriteLine("CURRENT CONTAINER CONTENTS AFTER NAVIGATION:");
+                foreach (var child in _currentActiveContainer.Children) {
+                    Debug.WriteLine($"  - {child.Name} at [{child.Position[0]},{child.Position[1]}], size [{child.Size[0]},{child.Size[1]}]");
+
+                    // Set depth to 1 temporarily for resize handles
+                    int originalDepth = child.Depth;
+                    child.Depth = 1;
+                    _boxManager.AddStorageBox(child);
+                    child.Depth = originalDepth;
                 }
+            } else {
+                // Fallback to root if something went wrong
+                _currentActiveContainer = _rootContainer;
+                _currentParentContainer = null;
+                _currentDepth = 1;
+                LoadAndDisplayStorage();
+                Debug.WriteLine("NavigateUp: Active container was null, falling back to root");
             }
 
             // Update UI
-            UpdateCurrentLocationDisplay(_currentActiveContainer?.Name ?? "Root");
-            Debug.WriteLine($"NavigateUp: Navigation completed. Current container: {_currentActiveContainer?.Name}, Depth: {_currentDepth}");
+            UpdateCurrentLocationDisplay(_currentActiveContainer == _rootContainer ? "Root" : _currentActiveContainer.Name);
+            Debug.WriteLine($"NavigateUp: Navigation completed. Current container: {_currentActiveContainer?.Name ?? "Root"}, Depth: {_currentDepth}");
+            Debug.WriteLine($"NAVIGATION DEBUG: NEW STATE - Level={_currentDepth}, Container={_currentActiveContainer?.Name ?? "Root"}, Parent={_currentParentContainer?.Name ?? "null"}");
+        }
 
-            // Add this to confirm the container hierarchy remains intact
-            Debug.WriteLine($"NavigateUp: ROOT CONTAINER INTEGRITY CHECK - Has {_rootContainer.Children.Count} top-level children");
-            foreach (var child in _rootContainer.Children) {
-                Debug.WriteLine($"NavigateUp: Child {child.Name} has {child.Children.Count} sub-containers");
+
+        // Add this helper method to print the complete container hierarchy for debugging
+        private void PrintContainerHierarchy(StorageContainer container, int level) {
+            if (container == null) return;
+
+            string indent = new string(' ', level * 2);
+            Debug.WriteLine($"{indent}- {container.Name} (Children: {container.Children.Count})");
+
+            foreach (var child in container.Children) {
+                PrintContainerHierarchy(child, level + 1);
             }
         }
+
 
 
 
@@ -519,17 +542,47 @@ namespace StorageHandler.Views {
 
         // Helper method to find the parent container of a named container
         private StorageContainer FindParentContainer(StorageContainer root, string childName) {
+            // Special case: if this is a direct child of root
             foreach (var child in root.Children) {
-                if (child.Name == childName) return root;
+                if (child.Name == childName) {
+                    return root;
+                }
+            }
 
+            // Search deeper in hierarchy
+            foreach (var child in root.Children) {
                 var result = FindParentContainer(child, childName);
-                if (result != null) return result;
+                if (result != null) {
+                    return result;
+                }
             }
 
             return null;
         }
 
+        private void SetNavigationContext() {
+            // Debug current state
+            Debug.WriteLine($"SetNavigationContext: Current container={_currentActiveContainer?.Name}, Depth={_currentDepth}");
 
+            // If at level 1, we're at root
+            if (_currentDepth == 1) {
+                _currentParentContainer = null;
+                return;
+            }
+
+            // Otherwise, find the parent
+            if (_currentActiveContainer != null) {
+                _currentParentContainer = FindParentContainer(_rootContainer, _currentActiveContainer.Name);
+
+                // If we're at level 2 and can't find a parent, root is the parent
+                if (_currentParentContainer == null && _currentDepth == 2) {
+                    _currentParentContainer = _rootContainer;
+                    Debug.WriteLine($"SetNavigationContext: Set root as parent for level 2 container {_currentActiveContainer.Name}");
+                }
+            }
+
+            Debug.WriteLine($"SetNavigationContext: Updated parent to {_currentParentContainer?.Name ?? "null"}");
+        }
 
         private void UpdateCurrentLocationDisplay(string containerName) {
             Title = $"Storage Handler - {containerName} (Level {_currentDepth})";

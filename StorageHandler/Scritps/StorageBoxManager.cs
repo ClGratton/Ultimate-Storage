@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace StorageHandler.Scripts {
     public class StorageBoxManager {
@@ -69,8 +70,19 @@ namespace StorageHandler.Scripts {
 
             _storageGrid.Children.Add(box);
 
-            // Add resize handle if this is a top-level container (depth 1)
-            if (container.Depth == 1 && _boxResizer != null) {
+            // Use the unified method to add resize handle if appropriate
+            TryAddResizeHandle(box, container);
+        }
+
+        /// <summary>
+        /// Adds a resize handle to a box if appropriate based on container properties.
+        /// All resize handle logic is consolidated in this single method.
+        /// </summary>
+        private void TryAddResizeHandle(Border box, StorageContainer container) {
+            // Add resize handles to containers at the current display level (Depth == 1)
+            // or those specifically marked for resize capability (Depth == 0)
+            if (_boxResizer != null && (container.Depth == 1 || container.Depth == 0)) {
+                Debug.WriteLine($"Adding resize handle to {container.Name} with depth {container.Depth}");
                 _boxResizer.AttachResizeHandle(box, container);
             }
         }
@@ -110,11 +122,10 @@ namespace StorageHandler.Scripts {
                 }
             }
         }
-        public void AddResizeHandleToBox(Border box, StorageContainer container) {
-            if (_boxResizer != null) {
-                _boxResizer.AttachResizeHandle(box, container);
-            }
-        }
 
+        // This method is kept for backward compatibility with existing code
+        public void sAddResizeHandleToBox(Border box, StorageContainer container) {
+            TryAddResizeHandle(box, container);
+        }
     }
 }
