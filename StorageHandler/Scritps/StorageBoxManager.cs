@@ -2,6 +2,7 @@ using StorageHandler.Models;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Linq;
+using System.Windows;
 
 namespace StorageHandler.Scripts {
     public class StorageBoxManager {
@@ -9,6 +10,7 @@ namespace StorageHandler.Scripts {
         private BoxResizer _boxResizer;
         private StorageLoader _storageLoader;
         private StorageContainer _rootContainer;
+        private StorageBoxDrag _boxDrag;
 
         public StorageBoxManager(Canvas storageGrid) {
             _storageGrid = storageGrid;
@@ -18,9 +20,11 @@ namespace StorageHandler.Scripts {
             _storageLoader = storageLoader;
             _rootContainer = rootContainer;
             _boxResizer = new BoxResizer(storageLoader, rootContainer);
+            _boxDrag = new StorageBoxDrag(_storageGrid, storageLoader, rootContainer, _boxResizer);
         }
 
         public void AddStorageBox(StorageContainer container) {
+            // Create the main border for the box
             var box = new Border {
                 Width = container.Size[0] * 100,
                 Height = container.Size[1] * 100,
@@ -31,9 +35,28 @@ namespace StorageHandler.Scripts {
                 DataContext = container
             };
 
+            // Add a TextBlock to display the box name
+            var textBlock = new TextBlock {
+                Text = container.Name,
+                Foreground = Brushes.Black,
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextWrapping = TextWrapping.Wrap,
+                TextAlignment = TextAlignment.Center
+            };
+
+            // Add the TextBlock to the Border using a Grid for centering
+            var grid = new Grid();
+            grid.Children.Add(textBlock);
+            box.Child = grid;
+
             // Calculate position based on container size
             Canvas.SetLeft(box, container.Position[0] * 100);
             Canvas.SetTop(box, container.Position[1] * 100);
+
+            // Add mouse event handlers for drag-and-drop functionality
+            _boxDrag.AttachDragHandlers(box, container);
 
             _storageGrid.Children.Add(box);
 
@@ -78,9 +101,5 @@ namespace StorageHandler.Scripts {
                 }
             }
         }
-
-
-
     }
 }
-

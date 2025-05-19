@@ -306,15 +306,17 @@ namespace StorageHandler.Scripts {
 
         // Horizontal and vertical adjustment logic is non-trivial and left as-is for clarity.
         private bool HandleHorizontalContainerAdjustments(
-            StorageContainer activeContainer,
-            int mainOriginalGridX, int mainOriginalGridWidth,
-            int mainProspectiveNewGridX, int mainNewGridWidth,
-            int mainProspectiveNewGridY, int mainNewGridHeight,
-            StringBuilder? debugSb = null) {
+    StorageContainer activeContainer,
+    int mainOriginalGridX, int mainOriginalGridWidth,
+    int mainProspectiveNewGridX, int mainNewGridWidth,
+    int mainProspectiveNewGridY, int mainNewGridHeight,
+    StringBuilder? debugSb = null) {
             int widthChange = mainNewGridWidth - mainOriginalGridWidth;
             int activeContainerOldRightEdge = mainOriginalGridX + mainOriginalGridWidth;
             int activeContainerNewRightEdge = mainProspectiveNewGridX + mainNewGridWidth;
 
+            // Only select boxes that are to the right of the active container's old right edge
+            // and have vertical overlap with the active container's new height
             var allBoxesToRight = _rootContainer.Children
                 .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
                 .Where(b => _originalChildPositions[b.Name][0] >= activeContainerOldRightEdge)
@@ -327,12 +329,28 @@ namespace StorageHandler.Scripts {
 
             if (widthChange > 0) {
                 int pushDistance = activeContainerNewRightEdge - activeContainerOldRightEdge;
-                foreach (var boxToPush in allBoxesToRight) {
-                    int newBoxX = _originalChildPositions[boxToPush.Name][0] + pushDistance;
-                    if (newBoxX + boxToPush.Size[0] > MaxGridCoordinate) return false;
+
+                // Modified logic: Only push boxes that would actually collide with the resized box
+                var boxesToPush = allBoxesToRight
+                    .Where(b => _originalChildPositions[b.Name][0] < activeContainerNewRightEdge)
+                    .ToList();
+
+                if (boxesToPush.Any()) {
+                    // Check if pushing these boxes would exceed grid limits
+                    foreach (var boxToPush in boxesToPush) {
+                        int newBoxX = _originalChildPositions[boxToPush.Name][0] + pushDistance;
+                        if (newBoxX + boxToPush.Size[0] > MaxGridCoordinate) return false;
+                    }
+
+                    // Push only the boxes that would collide
+                    foreach (var boxToPush in boxesToPush)
+                        boxToPush.Position[0] = _originalChildPositions[boxToPush.Name][0] + pushDistance;
+
+                    if (debugSb != null)
+                        debugSb.AppendLine($"Pushed {boxesToPush.Count} boxes to right by {pushDistance} units");
+                } else if (debugSb != null) {
+                    debugSb.AppendLine("No boxes needed to be pushed (enough space between boxes)");
                 }
-                foreach (var boxToPush in allBoxesToRight)
-                    boxToPush.Position[0] = _originalChildPositions[boxToPush.Name][0] + pushDistance;
             } else if (widthChange < 0) {
                 // For each box to the right, move it left as far as possible without overlapping
                 foreach (var box in allBoxesToRight.OrderBy(b => _originalChildPositions[b.Name][0])) {
@@ -352,6 +370,7 @@ namespace StorageHandler.Scripts {
             }
             return true;
         }
+
 
         private bool HandleVerticalContainerAdjustments(
             StorageContainer activeContainer,
