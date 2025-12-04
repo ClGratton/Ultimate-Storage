@@ -16,6 +16,7 @@ namespace StorageHandler.Views {
         private ICollectionView _modelsView;
 
         public ComponentModel? SelectedModel { get; private set; }
+        public List<ComponentModel> SelectedModels { get; private set; } = new List<ComponentModel>();
         public int SelectedQuantity { get; private set; } = 1;
 
         private string GetStr(string key) {
@@ -184,7 +185,7 @@ namespace StorageHandler.Views {
         }
 
         private void AddSelected_Click(object sender, RoutedEventArgs e) {
-            if (ModelsGrid.SelectedItem is ComponentModel model) {
+            if (ModelsGrid.SelectedItems.Count > 0) {
                 if (int.TryParse(QuantityBox.Text, out int qty) && qty > 0) {
                     SelectedQuantity = qty;
                 } else {
@@ -192,7 +193,18 @@ namespace StorageHandler.Views {
                     return;
                 }
 
-                SelectedModel = model;
+                SelectedModels.Clear();
+                foreach (var item in ModelsGrid.SelectedItems) {
+                    if (item is ComponentModel model) {
+                        SelectedModels.Add(model);
+                    }
+                }
+
+                // For backward compatibility or single selection convenience
+                if (SelectedModels.Count > 0) {
+                    SelectedModel = SelectedModels[0];
+                }
+
                 DialogResult = true;
                 Close();
             } else {
