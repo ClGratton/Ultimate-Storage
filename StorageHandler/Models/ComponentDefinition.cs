@@ -11,5 +11,11 @@ namespace StorageHandler.Models {
 
         [JsonPropertyName("customFields")]
         public List<string> CustomFields { get; set; } = new List<string>();
+
+        [JsonPropertyName("databaseFile")]
+        public string DatabaseFile { get; set; } = string.Empty;
+
+        [JsonPropertyName("idColumn")]
+        public string IdColumn { get; set; } = string.Empty;
     }
 }

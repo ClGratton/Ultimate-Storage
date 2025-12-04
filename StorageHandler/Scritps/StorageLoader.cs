@@ -1,7 +1,9 @@
 using StorageHandler.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Windows;
 
@@ -11,8 +13,8 @@ namespace StorageHandler.Scripts {
         private readonly string _tempPath;
         private readonly string _itemsDirectory;
         private readonly string _componentsPath;
-        private readonly string _componentsPersonalPath;
-        private readonly string _modelsPath;
+
+        public string? CustomComponentsPath { get; set; }
 
         public event Action<bool>? UnsavedChangesChanged;
         public bool HasUnsavedChanges => File.Exists(_tempPath);
@@ -26,159 +28,153 @@ namespace StorageHandler.Scripts {
             string databaseDir = Path.GetDirectoryName(storageDir) ?? string.Empty;
             _itemsDirectory = Path.Combine(databaseDir, "Items");
             _componentsPath = Path.Combine(databaseDir, "components.json");
-            _componentsPersonalPath = Path.Combine(databaseDir, "components_personal.json");
-            _modelsPath = Path.Combine(databaseDir, "models.json");
             
             if (!Directory.Exists(_itemsDirectory)) {
                 Directory.CreateDirectory(_itemsDirectory);
             }
 
-            // Migration: If components.json exists but components_personal.json does not,
-            // and components.json contains non-standard items, we should probably treat it as personal?
-            // For simplicity, let's just ensure components.json is the standard one, and if personal is missing, create it empty.
-            // But to avoid data loss, if personal is missing, we could copy current components.json to it?
-            // Let's just implement the Load logic to merge them.
+            // Generate Test Files (API Emulator)
+            ApiEmulator.GenerateTestFiles(databaseDir);
 
             Debug.WriteLine($"StorageLoader: Initialized with path: {originalPath}");
             Debug.WriteLine($"StorageLoader: Temp path: {_tempPath}");
             Debug.WriteLine($"StorageLoader: Items directory: {_itemsDirectory}");
             Debug.WriteLine($"StorageLoader: Components path: {_componentsPath}");
-            Debug.WriteLine($"StorageLoader: Personal Components path: {_componentsPersonalPath}");
-            Debug.WriteLine($"StorageLoader: Models path: {_modelsPath}");
         }
 
-        public List<ComponentModel> LoadModels() {
-            if (!File.Exists(_modelsPath)) return new List<ComponentModel>();
+        public List<ComponentModel> LoadCatalogFromFile(string path) {
+            if (!File.Exists(path)) return new List<ComponentModel>();
             try {
-                var json = File.ReadAllText(_modelsPath);
-                bool migrated = false;
+                var json = File.ReadAllText(path);
+                using (JsonDocument doc = JsonDocument.Parse(json)) {
+                    var root = doc.RootElement;
+                    if (root.ValueKind != JsonValueKind.Array) return new List<ComponentModel>();
 
-                // Migration: If the file uses "componentName", replace it with "category"
-                if (json.Contains("\"componentName\"")) {
-                    Debug.WriteLine("StorageLoader: Migrating models.json from ComponentModel to StorageItem format");
-                    json = json.Replace("\"componentName\"", "\"category\"");
-                    migrated = true;
+                    var items = new List<ComponentModel>();
+                    foreach (var element in root.EnumerateArray()) {
+                        var item = new ComponentModel();
+                        foreach (var prop in element.EnumerateObject()) {
+                            string key = prop.Name;
+                            string value = prop.Value.ToString();
+
+                            if (key.Equals("category", StringComparison.OrdinalIgnoreCase)) item.Category = value;
+                            else item.CustomData[key] = value;
+                        }
+                        items.Add(item);
+                    }
+                    return items;
                 }
-
-                // Migration: If the file uses "name", replace it with "category"
-                if (json.Contains("\"name\"")) {
-                    Debug.WriteLine("StorageLoader: Migrating models.json from Name to Category format");
-                    json = json.Replace("\"name\"", "\"category\"");
-                    migrated = true;
-                }
-
-                var items = JsonSerializer.Deserialize<List<ComponentModel>>(json) ?? new List<ComponentModel>();
-                
-                if (migrated) {
-                    SaveModels(items);
-                }
-
-                return items;
             } catch (Exception ex) {
-                Debug.WriteLine($"StorageLoader: Failed to load models: {ex.Message}");
+                Debug.WriteLine($"StorageLoader: Failed to load catalog from {path}: {ex.Message}");
                 return new List<ComponentModel>();
             }
         }
 
-        public void SaveModels(List<ComponentModel> models) {
-            try {
-                var json = JsonSerializer.Serialize(models, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_modelsPath, json);
-                Debug.WriteLine("StorageLoader: Saved models");
-            } catch (Exception ex) {
-                Debug.WriteLine($"StorageLoader: Failed to save models: {ex.Message}");
-            }
+        private string GetPropertyValue(ComponentModel item, string propertyName) {
+            if (string.IsNullOrEmpty(propertyName)) return "";
+            if (propertyName.Equals("category", StringComparison.OrdinalIgnoreCase)) return item.Category;
+            
+            if (item.CustomData.TryGetValue(propertyName, out string? val)) return val;
+            var key = item.CustomData.Keys.FirstOrDefault(k => k.Equals(propertyName, StringComparison.OrdinalIgnoreCase));
+            if (key != null) return item.CustomData[key];
+            return "";
         }
 
         public List<ComponentDefinition> LoadComponents() {
             var components = new List<ComponentDefinition>();
             
-            // 1. Load Standard Categories from File (Dynamic, not hardcoded)
-            if (File.Exists(_componentsPath)) {
-                try {
-                    var json = File.ReadAllText(_componentsPath);
-                    var standard = JsonSerializer.Deserialize<List<ComponentDefinition>>(json);
-                    if (standard != null) components.AddRange(standard);
-                } catch (Exception ex) {
-                    Debug.WriteLine($"StorageLoader: Failed to load standard components: {ex.Message}");
-                }
-            } else {
-                // First run: Initialize with realistic defaults if file is missing
-                var defaults = DatabaseSeeder.GetCommonCategories();
-                components.AddRange(defaults);
-                SaveComponents(components); // Create the file
-            }
+            string standardPath = CustomComponentsPath ?? _componentsPath;
 
-            // 2. Load Personal Categories from File
-            if (File.Exists(_componentsPersonalPath)) {
+            // Load Components from File
+            if (File.Exists(standardPath)) {
                 try {
-                    var json = File.ReadAllText(_componentsPersonalPath);
-                    var personal = JsonSerializer.Deserialize<List<ComponentDefinition>>(json);
-                    if (personal != null) {
-                        foreach (var p in personal) {
-                            if (!components.Any(c => c.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase))) {
-                                components.Add(p);
-                            }
-                        }
-                    }
+                    var json = File.ReadAllText(standardPath);
+                    var loaded = JsonSerializer.Deserialize<List<ComponentDefinition>>(json);
+                    if (loaded != null) components.AddRange(loaded);
                 } catch (Exception ex) {
-                    Debug.WriteLine($"StorageLoader: Failed to load personal components: {ex.Message}");
+                    Debug.WriteLine($"StorageLoader: Failed to load components: {ex.Message}");
                 }
+            } else if (CustomComponentsPath == null) {
+                // First run: Initialize with empty defaults or create file
+                SaveComponents(components); // Create the file
             }
 
             return components;
         }
 
         public void SaveComponents(List<ComponentDefinition> components) {
-            var standard = DatabaseSeeder.GetCommonCategories();
-            var personal = new List<ComponentDefinition>();
-
-            foreach (var c in components) {
-                // If it's not in the standard list, it's personal
-                if (!standard.Any(s => s.Name.Equals(c.Name, StringComparison.OrdinalIgnoreCase))) {
-                    personal.Add(c);
-                }
-            }
+            string standardPath = CustomComponentsPath ?? _componentsPath;
 
             try {
-                var json = JsonSerializer.Serialize(personal, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_componentsPersonalPath, json);
-                Debug.WriteLine("StorageLoader: Saved personal components");
-                
-                // Also save standard ones to components.json just for reference/backup, or leave it alone?
-                // Let's save the standard ones to components.json so it looks clean
-                var standardJson = JsonSerializer.Serialize(standard, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(_componentsPath, standardJson);
-                
+                var json = JsonSerializer.Serialize(components, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(standardPath, json);
+                Debug.WriteLine($"StorageLoader: Saved components to {standardPath}");
             } catch (Exception ex) {
                 Debug.WriteLine($"StorageLoader: Failed to save components: {ex.Message}");
             }
         }
 
         public List<StorageItem> LoadItems(string containerName) {
-            string filePath = Path.Combine(_itemsDirectory, $"{containerName}.json");
-            if (!File.Exists(filePath)) return new List<StorageItem>();
+            // 1. Get Definition to find Catalog File
+            var components = LoadComponents();
+            var definition = components.FirstOrDefault(c => c.Name.Equals(containerName, StringComparison.OrdinalIgnoreCase));
+            
+            List<ComponentModel> catalog = new List<ComponentModel>();
+            if (definition != null && !string.IsNullOrEmpty(definition.DatabaseFile)) {
+                string catalogPath = Path.Combine(Path.GetDirectoryName(_itemsDirectory) ?? "", "Components", definition.DatabaseFile);
+                if (File.Exists(catalogPath)) {
+                    catalog = LoadCatalogFromFile(catalogPath);
+                }
+            }
+
+            // 2. Load Inventory (IDs + Quantities)
+            string inventoryPath = Path.Combine(_itemsDirectory, $"storage_{containerName}.json");
+            // Fallback for legacy naming
+            if (!File.Exists(inventoryPath)) inventoryPath = Path.Combine(_itemsDirectory, $"{containerName}.json");
+
+            if (!File.Exists(inventoryPath)) return new List<StorageItem>();
 
             try {
-                var json = File.ReadAllText(filePath);
-                bool migrated = false;
+                var json = File.ReadAllText(inventoryPath);
+                using (JsonDocument doc = JsonDocument.Parse(json)) {
+                    var root = doc.RootElement;
+                    if (root.ValueKind != JsonValueKind.Array) return new List<StorageItem>();
 
-                if (json.Contains("\"componentName\"")) {
-                    json = json.Replace("\"componentName\"", "\"category\"");
-                    migrated = true;
+                    var items = new List<StorageItem>();
+                    foreach (var element in root.EnumerateArray()) {
+                        var item = new StorageItem();
+                        
+                        string id = "";
+                        int quantity = 0;
+                        
+                        if (element.TryGetProperty("id", out var idProp)) id = idProp.GetString() ?? "";
+                        if (element.TryGetProperty("quantity", out var qtyProp)) quantity = qtyProp.GetInt32();
+
+                        // If we have a catalog, look it up
+                        if (catalog.Count > 0 && !string.IsNullOrEmpty(id)) {
+                            string idCol = definition?.IdColumn ?? "id";
+                            
+                            // Find item where property[idCol] == id
+                            var catalogItem = catalog.FirstOrDefault(c => GetPropertyValue(c, idCol) == id);
+                            
+                            if (catalogItem != null) {
+                                item.Category = catalogItem.Category;
+                                item.CustomData = new Dictionary<string, string>(catalogItem.CustomData);
+                                item.Id = id;
+                            } else {
+                                item.Id = id;
+                                item.CustomData["Description"] = "Unknown Item (Missing from Catalog)";
+                            }
+                        } else {
+                            // Legacy or No Catalog: Load full object from JSON
+                            item = JsonSerializer.Deserialize<StorageItem>(element.GetRawText()) ?? new StorageItem();
+                        }
+
+                        item.Quantity = quantity;
+                        items.Add(item);
+                    }
+                    return items;
                 }
-                if (json.Contains("\"name\"")) {
-                    json = json.Replace("\"name\"", "\"category\"");
-                    migrated = true;
-                }
-
-                var items = JsonSerializer.Deserialize<List<StorageItem>>(json) ?? new List<StorageItem>();
-
-                if (migrated) {
-                    SaveItems(containerName, items);
-                }
-
-                return items;
             } catch (Exception ex) {
                 Debug.WriteLine($"StorageLoader: Failed to load items for {containerName}: {ex.Message}");
                 return new List<StorageItem>();
@@ -187,9 +183,24 @@ namespace StorageHandler.Scripts {
 
         public void SaveItems(string containerName, List<StorageItem> items) {
             try {
-                string filePath = Path.Combine(_itemsDirectory, $"{containerName}.json");
-                var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(filePath, json);
+                var components = LoadComponents();
+                var definition = components.FirstOrDefault(c => c.Name.Equals(containerName, StringComparison.OrdinalIgnoreCase));
+                
+                bool useNewSystem = definition != null && !string.IsNullOrEmpty(definition.DatabaseFile);
+                
+                string filePath = Path.Combine(_itemsDirectory, $"storage_{containerName}.json");
+                
+                if (useNewSystem) {
+                    // Save only ID and Quantity
+                    var inventoryItems = items.Select(i => new { id = i.Id, quantity = i.Quantity }).ToList();
+                    var json = JsonSerializer.Serialize(inventoryItems, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, json);
+                } else {
+                    // Legacy: Save full object
+                    var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(filePath, json);
+                }
+                
                 Debug.WriteLine($"StorageLoader: Saved items for {containerName}");
             } catch (Exception ex) {
                 Debug.WriteLine($"StorageLoader: Failed to save items for {containerName}: {ex.Message}");
@@ -197,8 +208,11 @@ namespace StorageHandler.Scripts {
         }
 
         public void RenameItemFile(string oldName, string newName) {
-            string oldPath = Path.Combine(_itemsDirectory, $"{oldName}.json");
-            string newPath = Path.Combine(_itemsDirectory, $"{newName}.json");
+            string oldPath = Path.Combine(_itemsDirectory, $"storage_{oldName}.json");
+            string newPath = Path.Combine(_itemsDirectory, $"storage_{newName}.json");
+            
+            // Also check legacy paths
+            if (!File.Exists(oldPath)) oldPath = Path.Combine(_itemsDirectory, $"{oldName}.json");
             
             if (File.Exists(oldPath)) {
                 try {
@@ -212,7 +226,7 @@ namespace StorageHandler.Scripts {
         }
 
         public void DeleteItems(string containerName) {
-            string filePath = Path.Combine(_itemsDirectory, $"{containerName}.json");
+            string filePath = Path.Combine(_itemsDirectory, $"storage_{containerName}.json");
             if (File.Exists(filePath)) {
                 try {
                     File.Delete(filePath);
@@ -220,6 +234,14 @@ namespace StorageHandler.Scripts {
                 } catch (Exception ex) {
                     Debug.WriteLine($"StorageLoader: Failed to delete items file for {containerName}: {ex.Message}");
                 }
+            }
+            
+            // Legacy
+            filePath = Path.Combine(_itemsDirectory, $"{containerName}.json");
+            if (File.Exists(filePath)) {
+                try {
+                    File.Delete(filePath);
+                } catch { }
             }
         }
 
@@ -266,11 +288,10 @@ namespace StorageHandler.Scripts {
         }
 
         private StorageContainer CreateDefaultContainer() {
-            Debug.WriteLine("StorageLoader: Creating default container");
             return new StorageContainer {
                 Name = "Default",
                 Type = "container",
-                Allowed = new List<string> { "electronics" },
+                Allowed = new List<string>(),
                 Color = "#F8F9FA",
                 Position = new int[2] { 0, 0 },
                 Size = new int[2] { 1, 1 },

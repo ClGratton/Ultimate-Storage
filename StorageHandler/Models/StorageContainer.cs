@@ -30,6 +30,9 @@ namespace StorageHandler.Models {
         [JsonPropertyName("isItemContainer")]
         public bool IsItemContainer { get; set; } = false;
 
+        [JsonPropertyName("itemsDatabasePath")]
+        public string? ItemsDatabasePath { get; set; }
+
         [JsonIgnore]
         public List<StorageItem> Items { get; set; } = new List<StorageItem>();
     }

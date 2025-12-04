@@ -9,6 +9,10 @@ namespace StorageHandler.Views {
     public partial class ManageCategoriesWindow : Window {
         private readonly ObservableCollection<ComponentDefinition> _categories;
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public ManageCategoriesWindow(ObservableCollection<ComponentDefinition> categories) {
             InitializeComponent();
             _categories = categories;
@@ -20,7 +24,7 @@ namespace StorageHandler.Views {
             if (string.IsNullOrEmpty(name)) return;
 
             if (_categories.Any(c => c.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase))) {
-                MessageBox.Show("Category already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(GetStr("Str_CategoryExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -30,23 +34,11 @@ namespace StorageHandler.Views {
 
         private void Delete_Click(object sender, RoutedEventArgs e) {
             if (CategoriesList.SelectedItem is ComponentDefinition selected) {
-                var result = MessageBox.Show($"Are you sure you want to delete '{selected.Name}'?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                var result = MessageBox.Show(string.Format(GetStr("Str_ConfirmDeleteCategorySimple"), selected.Name), GetStr("Str_ConfirmDeleteCategory"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes) {
                     _categories.Remove(selected);
                 }
             }
-        }
-
-        private void Import_Click(object sender, RoutedEventArgs e) {
-            var common = DatabaseSeeder.GetCommonCategories();
-            int added = 0;
-            foreach (var cat in common) {
-                if (!_categories.Any(c => c.Name.Equals(cat.Name, System.StringComparison.OrdinalIgnoreCase))) {
-                    _categories.Add(cat);
-                    added++;
-                }
-            }
-            MessageBox.Show($"Imported {added} new categories.", "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void Close_Click(object sender, RoutedEventArgs e) {

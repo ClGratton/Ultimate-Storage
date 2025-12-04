@@ -6,6 +6,10 @@ namespace StorageHandler.Views {
     public partial class NewModelWindow : Window {
         public ComponentModel? Result { get; private set; }
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public NewModelWindow(List<ComponentDefinition> components) {
             InitializeComponent();
             ComponentCombo.ItemsSource = components;
@@ -14,27 +18,29 @@ namespace StorageHandler.Views {
 
         private void Create_Click(object sender, RoutedEventArgs e) {
             if (string.IsNullOrWhiteSpace(ModelNumberBox.Text)) {
-                MessageBox.Show("Please enter a model number.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(GetStr("Str_EnterModelNumber"), GetStr("Str_ValidationError"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (ComponentCombo.SelectedItem == null) {
-                MessageBox.Show("Please select a component category.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(GetStr("Str_SelectCategoryMsg"), GetStr("Str_ValidationError"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (ComponentCombo.SelectedItem is not ComponentDefinition selectedComponent) {
-                MessageBox.Show("Invalid component selection.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(GetStr("Str_InvalidComponent"), GetStr("Str_ValidationError"), MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             Result = new ComponentModel {
                 Category = selectedComponent.Name,
-                ModelNumber = ModelNumberBox.Text.Trim(),
-                DatasheetLink = DatasheetBox.Text.Trim(),
-                Type = TypeBox.Text.Trim(),
-                Value = ValueBox.Text.Trim(),
-                Description = DescriptionBox.Text.Trim()
+                CustomData = new Dictionary<string, string> {
+                    { "ModelNumber", ModelNumberBox.Text.Trim() },
+                    { "DatasheetLink", DatasheetBox.Text.Trim() },
+                    { "Type", TypeBox.Text.Trim() },
+                    { "Value", ValueBox.Text.Trim() },
+                    { "Description", DescriptionBox.Text.Trim() }
+                }
             };
 
             DialogResult = true;

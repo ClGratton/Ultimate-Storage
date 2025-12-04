@@ -165,34 +165,6 @@
                   HorizontalAlignment="Center"/>
 
             <StackPanel Grid.Row="2" x:Name="CategoryStackPanel" Margin="10,0">
-                <RadioButton Content="{DynamicResource Str_Electronics}"
-                             Height="{DynamicResource BaseControlHeight}"
-                             GroupName="StorageType"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Tag="electronics"
-                             IsChecked="True"
-                             Checked="Category_Checked"/>
-
-                <RadioButton Content="{DynamicResource Str_Yugioh}"
-                             Height="{DynamicResource BaseControlHeight}"
-                             GroupName="StorageType"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Tag="yugioh"
-                             Checked="Category_Checked"/>
-
-                <RadioButton Content="{DynamicResource Str_Filament}"
-                             Height="{DynamicResource BaseControlHeight}"
-                             GroupName="StorageType"
-                             Foreground="White"
-                             FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}"
-                             Tag="filament"
-                             Checked="Category_Checked"/>
-
                 <Button Height="{DynamicResource BaseControlHeight}"
                         Foreground="White"
                         FontSize="14"
@@ -207,7 +179,7 @@
                                     Padding="15,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="+" FontWeight="Bold" Margin="0,0,10,0"/>
-                                    <TextBlock Text="New Category"/> 
+                                    <TextBlock Text="{DynamicResource Str_NewCategory}"/> 
                                 </StackPanel>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -235,7 +207,7 @@
                     BorderThickness="0"
                     Foreground="{DynamicResource TextPrimaryBrush}"
                     Panel.ZIndex="100"
-                    ToolTip="Close Application">
+                    ToolTip="{DynamicResource Str_CloseApp}">
                 <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Margin="0,0,1,1"/>
                 <Button.Style>
                     <Style TargetType="Button">
@@ -331,50 +303,7 @@
                       HeadersVisibility="Column"
                       CanUserAddRows="False"
                       CellEditEnding="ItemsGrid_CellEditEnding">
-                <DataGrid.Resources>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
-                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
-                        <Setter Property="Padding" Value="10,5"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="BorderThickness" Value="0,0,1,2"/>
-                        <Setter Property="BorderBrush" Value="{DynamicResource ControlAltBackgroundBrush}"/>
-                    </Style>
-                </DataGrid.Resources>
-                <DataGrid.Columns>
-                    <!-- Component Column (Read Only) -->
-                    <DataGridTextColumn Header="{DynamicResource Str_Component}" 
-                                        Binding="{Binding Category}"
-                                        Width="150"
-                                        IsReadOnly="True"/>
-
-                    <!-- Model Number Column (Read Only) -->
-                    <DataGridTextColumn Header="{DynamicResource Str_ModelNumber}"
-                                        Binding="{Binding ModelNumber}"
-                                        Width="150"
-                                        IsReadOnly="True"/>
-
-                    <!-- Datasheet Link Column -->
-                    <DataGridTemplateColumn Header="{DynamicResource Str_Datasheet}" Width="80" IsReadOnly="True">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="📄" 
-                                        ToolTip="{Binding DatasheetLink}"
-                                        Click="OpenDatasheet_Click"
-                                        Visibility="{Binding DatasheetLink, Converter={StaticResource StringToVisibilityConverter}}"
-                                        Background="Transparent" 
-                                        BorderThickness="0"
-                                        Foreground="{DynamicResource PrimaryBrush}"
-                                        FontSize="16"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-
-                    <DataGridTextColumn Header="{DynamicResource Str_Type}" Binding="{Binding Type}" Width="120" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Value}" Binding="{Binding Value}" Width="100" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Qty}" Binding="{Binding Quantity}" Width="60" />
-                    <DataGridTextColumn Header="{DynamicResource Str_Description}" Binding="{Binding Description}" Width="2*" IsReadOnly="True"/>
-                </DataGrid.Columns>
+                <!-- Columns are generated dynamically in code -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="{DynamicResource Str_AddItem}" Click="AddItem_Click"/>
@@ -394,8 +323,8 @@
                         Background="{DynamicResource SelectionBrush2}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
                         BorderThickness="0"
-                        ToolTip="Revert Changes">
-                    <TextBlock Text="Undo" FontSize="14" FontWeight="Bold"/>
+                        ToolTip="{DynamicResource Str_Revert}">
+                    <TextBlock Text="{DynamicResource Str_Undo}" FontSize="14" FontWeight="Bold"/>
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="{DynamicResource BackButtonCornerRadius}"/>
@@ -433,7 +362,7 @@
                         Background="{DynamicResource SelectionBrush}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
                         BorderThickness="0"
-                        ToolTip="Save Changes">
+                        ToolTip="{DynamicResource Str_Save}">
                     <TextBlock Text="💾" FontSize="16"/>
                     <Button.Resources>
                         <Style TargetType="Border">

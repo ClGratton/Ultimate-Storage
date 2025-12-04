@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -31,6 +32,10 @@ namespace StorageHandler.Views {
         private StorageContainer? _currentActiveContainer;
         private int _currentDepth = 1; // Start at default depth 1
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public MainWindow() {
             InitializeComponent();
 
@@ -43,21 +48,36 @@ namespace StorageHandler.Views {
             // or we can defer their full initialization until LoadStorageCategory is called.
             // However, DisplayManager needs a loader in constructor.
             // Let's initialize with default path first.
-            string jsonPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage1.json");
-            _storageLoader = new StorageLoader(jsonPath);
+            // Migration: Rename storage1.json to storage_electronics.json if it exists and the new one doesn't
+            string oldDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage1.json");
+            string newDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage_electronics.json");
+            
+            if (File.Exists(oldDefaultPath) && !File.Exists(newDefaultPath)) {
+                try {
+                    File.Move(oldDefaultPath, newDefaultPath);
+                } catch (Exception ex) {
+                    Debug.WriteLine($"Failed to migrate storage1.json: {ex.Message}");
+                }
+            }
+
+            // Initialize with a dummy path or the first available category
+            // We'll let LoadCustomCategories populate the UI and then select the first one
+            string initialPath = File.Exists(newDefaultPath) ? newDefaultPath : oldDefaultPath;
+            _storageLoader = new StorageLoader(initialPath);
             
             _displayManager = new StorageDisplayManager(_storageLoader, _boxManager, StorageGrid);
             _colorEditor = new ColorEditor(_storageLoader, _boxManager, null); // Root container will be set later
 
             LoadCustomCategories();
 
-            // The Checked event fires during InitializeComponent, so LoadStorageCategory might have been called already.
-            // But _boxManager was null then. So we should call it explicitly if needed, or rely on the event firing after constructor?
-            // Actually, InitializeComponent runs before we set _boxManager.
-            // So the event handler would have failed or done nothing.
-            // We should manually trigger the load for the default category here.
-            
-            LoadStorageCategory("electronics");
+            // Select the first category if available
+            if (CategoryStackPanel.Children.Count > 1 && CategoryStackPanel.Children[0] is RadioButton firstRb) {
+                firstRb.IsChecked = true;
+                // The Checked event will trigger LoadStorageCategory
+            } else {
+                // No categories exist?
+                ClearView();
+            }
         }
 
         private void Category_Checked(object sender, RoutedEventArgs e) {
@@ -70,21 +90,14 @@ namespace StorageHandler.Views {
 
         private void CategorySettings_Click(object sender, RoutedEventArgs e) {
             if (sender is Button btn && btn.Tag is string category) {
-                MessageBox.Show($"Settings for {category} are not yet implemented.", "Settings", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(string.Format(GetStr("Str_SettingsNotImplemented"), category), GetStr("Str_Settings"), MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private void CategoryDelete_Click(object sender, RoutedEventArgs e) {
             if (sender is Button btn && btn.Tag is string category) {
-                // Prevent deleting default categories if desired, though user didn't specify.
-                // But let's be safe for "electronics" as it's the fallback.
-                if (category.Equals("electronics", StringComparison.OrdinalIgnoreCase)) {
-                    MessageBox.Show("Cannot delete the default 'Electronics' category.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                var result = MessageBox.Show($"Are you sure you want to delete the category '{category}'? This will delete all data associated with it.", 
-                                             "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                var result = MessageBox.Show(string.Format(GetStr("Str_ConfirmDeleteCategory"), category), 
+                                             GetStr("Str_DeleteCategory"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 
                 if (result == MessageBoxResult.Yes) {
                     DeleteCategory(category);
@@ -95,7 +108,7 @@ namespace StorageHandler.Views {
         private void DeleteCategory(string category) {
             try {
                 // 1. Determine filename
-                string filename = category == "electronics" ? "storage1.json" : $"storage_{category}.json";
+                string filename = $"storage_{category}.json";
                 string fullPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
                 string tempPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename.Replace(".json", ".temp.json"));
 
@@ -103,7 +116,17 @@ namespace StorageHandler.Views {
                 if (File.Exists(fullPath)) File.Delete(fullPath);
                 if (File.Exists(tempPath)) File.Delete(tempPath);
 
-                // 3. Remove from UI
+                // 3. Remove from Components Registry (components.json)
+                if (_storageLoader != null) {
+                    var components = _storageLoader.LoadComponents();
+                    var def = components.FirstOrDefault(c => c.Name.Equals(category, StringComparison.OrdinalIgnoreCase));
+                    if (def != null) {
+                        components.Remove(def);
+                        _storageLoader.SaveComponents(components);
+                    }
+                }
+
+                // 4. Remove from UI
                 RadioButton? toRemove = null;
                 foreach (var child in CategoryStackPanel.Children) {
                     if (child is RadioButton rb && rb.Tag is string tag && tag.Equals(category, StringComparison.OrdinalIgnoreCase)) {
@@ -116,24 +139,51 @@ namespace StorageHandler.Views {
                     CategoryStackPanel.Children.Remove(toRemove);
                 }
 
-                // 4. Switch to default category if we deleted the current one
+                // 5. Switch to default category if we deleted the current one
                 // Since the buttons are only visible on the selected category, we are definitely deleting the current one.
                 // So we must switch.
-                if (CategoryStackPanel.Children.Count > 0 && CategoryStackPanel.Children[0] is RadioButton defaultRb) {
+                if (CategoryStackPanel.Children.Count > 1 && CategoryStackPanel.Children[0] is RadioButton defaultRb) {
                     defaultRb.IsChecked = true;
+                } else {
+                    // No categories left. Clear the view.
+                    ClearView();
                 }
 
             } catch (Exception ex) {
-                MessageBox.Show($"Error deleting category: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error deleting category: {ex.Message}", GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void NewCategory_Click(object sender, RoutedEventArgs e) {
-            var inputWindow = new InputWindow("New Category", "Enter category name:");
-            inputWindow.Owner = this;
+        private void ClearView() {
+            _rootContainer = null;
+            _storageLoader = null;
+            _currentActiveContainer = null;
+            _currentParentContainer = null;
             
-            if (inputWindow.ShowDialog() == true) {
-                string categoryName = inputWindow.InputValue.Trim();
+            if (_boxManager != null) {
+                _boxManager.ClearStorageGrid();
+                _boxManager.HideEmptyStatePrompt();
+            }
+            
+            StorageGrid.Visibility = Visibility.Visible;
+            ItemsGrid.Visibility = Visibility.Collapsed;
+            
+            // Disable persistence buttons
+            UpdatePersistenceButtons(false);
+            
+            // Update title
+            Title = "Storage Handler";
+        }
+
+        private void NewCategory_Click(object sender, RoutedEventArgs e) {
+            var newCategoryWindow = new NewCategoryWindow();
+            newCategoryWindow.Owner = this;
+            
+            if (newCategoryWindow.ShowDialog() == true) {
+                string categoryName = newCategoryWindow.CategoryName.Trim();
+                string itemsPath = newCategoryWindow.ItemsFilePath;
+                string idColumn = newCategoryWindow.IdColumn;
+
                 if (string.IsNullOrEmpty(categoryName)) return;
 
                 // Sanitize for filename
@@ -142,7 +192,7 @@ namespace StorageHandler.Views {
                 // Check if category already exists in UI
                 foreach (var child in CategoryStackPanel.Children) {
                     if (child is RadioButton rb && rb.Tag is string tag && tag.Equals(safeName.ToLower(), StringComparison.OrdinalIgnoreCase)) {
-                        MessageBox.Show("Category already exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(GetStr("Str_CategoryExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
                 }
@@ -151,7 +201,40 @@ namespace StorageHandler.Views {
                 string fullPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
 
                 if (File.Exists(fullPath)) {
-                    MessageBox.Show("Category already exists!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(GetStr("Str_CategoryExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Save Component Definition
+                if (_storageLoader != null) {
+                    var components = _storageLoader.LoadComponents();
+                    var def = components.FirstOrDefault(c => c.Name.Equals(safeName.ToLower(), StringComparison.OrdinalIgnoreCase));
+                    if (def == null) {
+                        def = new ComponentDefinition { Name = safeName.ToLower() };
+                        components.Add(def);
+                    }
+                    def.DatabaseFile = itemsPath;
+                    def.IdColumn = idColumn;
+                    _storageLoader.SaveComponents(components);
+                }
+
+                // Create initial storage file with the selected items path
+                var initialContainer = new StorageContainer {
+                    Name = categoryName,
+                    Type = "container",
+                    Allowed = new List<string> { safeName.ToLower() },
+                    Color = "#F8F9FA",
+                    Position = new int[2] { 0, 0 },
+                    Size = new int[2] { 1, 1 },
+                    Children = new List<StorageContainer>(),
+                    ItemsDatabasePath = itemsPath
+                };
+
+                try {
+                    var json = JsonSerializer.Serialize(initialContainer, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(fullPath, json);
+                } catch (Exception ex) {
+                    MessageBox.Show($"Error creating category: {ex.Message}", GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -177,12 +260,6 @@ namespace StorageHandler.Views {
 
                 string category = filename.Replace("storage_", "").Replace(".json", "");
                 
-                // Skip known hardcoded ones
-                if (category.Equals("yugioh", StringComparison.OrdinalIgnoreCase) || 
-                    category.Equals("filament", StringComparison.OrdinalIgnoreCase)) {
-                    continue;
-                }
-
                 // Convert to Title Case for display
                 string displayName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category);
                 AddCategoryButton(category, displayName);
@@ -208,9 +285,7 @@ namespace StorageHandler.Views {
         }
 
         private void LoadStorageCategory(string category) {
-            string filename;
-            if (category == "electronics") filename = "storage1.json";
-            else filename = $"storage_{category}.json";
+            string filename = $"storage_{category}.json";
 
             string jsonPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
             Debug.WriteLine($"MainWindow: Switching category to {category}, path: {jsonPath}");
@@ -233,6 +308,23 @@ namespace StorageHandler.Views {
                     throw new Exception("Root container is null after loading storage.");
                 }
 
+                // Self-Healing: If this category has a linked database but isn't in components.json, add it.
+                if (!string.IsNullOrEmpty(_rootContainer.ItemsDatabasePath)) {
+                    var components = _storageLoader.LoadComponents();
+                    var existingDef = components.FirstOrDefault(c => c.Name.Equals(category, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (existingDef == null) {
+                        Debug.WriteLine($"MainWindow: Restoring missing component definition for {category}");
+                        var newDef = new ComponentDefinition {
+                            Name = category,
+                            DatabaseFile = _rootContainer.ItemsDatabasePath,
+                            IdColumn = "id" // Default to "id" as we don't store this in StorageContainer yet
+                        };
+                        components.Add(newDef);
+                        _storageLoader.SaveComponents(components);
+                    }
+                }
+
                 if (_boxManager != null) _boxManager.InitializeResizer(_storageLoader, _rootContainer);
                 if (_colorEditor != null) _colorEditor.UpdateContainer(_rootContainer);
 
@@ -247,10 +339,10 @@ namespace StorageHandler.Views {
                 
                 // Load components/models for this category (shared or specific?)
                 // Assuming shared for now, but we should reload them to be safe
-                ReloadComponentsAndModels();
+                ReloadComponentsAndModels(category);
 
             } catch (Exception ex) {
-                MessageBox.Show($"Error loading category {category}: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error loading category {category}: {ex.Message}", GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -263,7 +355,7 @@ namespace StorageHandler.Views {
             if (RevertButton != null) RevertButton.IsEnabled = hasChanges;
         }
 
-        private void ReloadComponentsAndModels() {
+        private void ReloadComponentsAndModels(string? categoryName = null) {
             if (_storageLoader == null) return;
 
             AvailableComponents.Clear();
@@ -272,14 +364,29 @@ namespace StorageHandler.Views {
             var components = _storageLoader.LoadComponents();
             foreach (var comp in components) AvailableComponents.Add(comp);
             
-            var models = _storageLoader.LoadModels();
-            foreach (var model in models) AvailableModels.Add(model);
+            // Load category specific catalog if available
+            if (!string.IsNullOrEmpty(categoryName)) {
+                var def = components.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+                if (def != null && !string.IsNullOrEmpty(def.DatabaseFile)) {
+                    string catalogPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Components", def.DatabaseFile);
+                    
+                    // Fallback: Check if it's a full path or relative
+                    if (!File.Exists(catalogPath) && File.Exists(def.DatabaseFile)) {
+                        catalogPath = def.DatabaseFile;
+                    }
+
+                    if (File.Exists(catalogPath)) {
+                        var catalogItems = _storageLoader.LoadCatalogFromFile(catalogPath);
+                        foreach (var item in catalogItems) {
+                            // Add to AvailableModels
+                            AvailableModels.Add(item);
+                        }
+                    }
+                }
+            }
 
             if (AvailableComponents.Count == 0) {
-                var commonCategories = DatabaseSeeder.GetCommonCategories();
-                foreach (var cat in commonCategories) {
-                    AvailableComponents.Add(cat);
-                }
+                // No components available
                 _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
             }
         }
@@ -287,8 +394,7 @@ namespace StorageHandler.Views {
         private void LoadAndDisplayStorage() {
             if (_rootContainer == null || _displayManager == null || _boxManager == null) {
                 Debug.WriteLine("LoadAndDisplayStorage: Root container or managers are null. Exiting.");
-                MessageBox.Show("Failed to load storage data.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Application.Current.Shutdown();
+                // Do not show error message here, just exit. This happens when clearing view.
                 return;
             }
 
@@ -322,19 +428,19 @@ namespace StorageHandler.Views {
 
         private void SaveChanges_Click(object sender, RoutedEventArgs e) {
             if (_rootContainer == null || _storageLoader == null) {
-                MessageBox.Show("No data to save.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(GetStr("Str_NoDataToSave"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             // Save the current root container directly
             _storageLoader.SavePermanent(_rootContainer);
-            MessageBox.Show("Changes saved successfully.", "Save Changes", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(GetStr("Str_SaveSuccess"), GetStr("Str_Save"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void RevertChanges_Click(object sender, RoutedEventArgs e) {
             if (_storageLoader == null) return;
 
-            var result = MessageBox.Show("Are you sure you want to undo all unsaved changes?", "Confirm Undo", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(GetStr("Str_ConfirmUndoMsg"), GetStr("Str_ConfirmUndoTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
 
             // Revert changes by deleting temp file
@@ -434,7 +540,7 @@ namespace StorageHandler.Views {
                 // But maybe they still want to navigate up?
                 // Let's show a minimal menu if they right click empty space in an empty container.
                 var contextMenu = new ContextMenu();
-                var upMenuItem = new MenuItem { Header = "Navigate Up a Level" };
+                var upMenuItem = new MenuItem { Header = GetStr("Str_NavigateUp") };
                 upMenuItem.Click += (s, ev) => NavigateUp();
                 contextMenu.Items.Add(upMenuItem);
                 
@@ -452,13 +558,13 @@ namespace StorageHandler.Views {
             var contextMenu = new ContextMenu();
 
             // Add box option
-            var menuItem = new MenuItem { Header = "Add Box" };
+            var menuItem = new MenuItem { Header = GetStr("Str_AddBox") };
             menuItem.Click += (s, e) => AddNewBox(gridX, gridY);
             contextMenu.Items.Add(menuItem);
 
             // Convert to Item List option (only if empty and not root)
             if (_currentDepth > 1 && _currentActiveContainer != null && _currentActiveContainer.Children.Count == 0) {
-                var itemListItem = new MenuItem { Header = "Convert to Item List" };
+                var itemListItem = new MenuItem { Header = GetStr("Str_ConvertToItemList") };
                 itemListItem.Click += (s, e) => ConvertToItemList();
                 contextMenu.Items.Add(itemListItem);
             }
@@ -466,7 +572,7 @@ namespace StorageHandler.Views {
             // Navigate up option (available when not at top level)
             if (_currentDepth > 1) {
                 contextMenu.Items.Add(new Separator());
-                var upMenuItem = new MenuItem { Header = "Navigate Up a Level" };
+                var upMenuItem = new MenuItem { Header = GetStr("Str_NavigateUp") };
                 upMenuItem.Click += (s, e) => NavigateUp();
                 contextMenu.Items.Add(upMenuItem);
             }
@@ -487,18 +593,18 @@ namespace StorageHandler.Views {
             var contextMenu = new ContextMenu();
 
             // Delete option
-            var deleteMenuItem = new MenuItem { Header = "Delete Box" };
+            var deleteMenuItem = new MenuItem { Header = GetStr("Str_DeleteBox") };
             deleteMenuItem.Click += (s, e) => DeleteBox(container);
             contextMenu.Items.Add(deleteMenuItem);
 
             // Navigate into option - show for all containers, not just those with children
-            var navigateMenuItem = new MenuItem { Header = "Navigate Into (or Double-Click)" };
+            var navigateMenuItem = new MenuItem { Header = GetStr("Str_NavigateInto") };
             navigateMenuItem.Click += (s, e) => NavigateToContainer(container);
             contextMenu.Items.Add(navigateMenuItem);
 
             // Navigate up option (available when not at top level)
             if (_currentDepth > 1) {
-                var upMenuItem = new MenuItem { Header = "Navigate Up a Level" };
+                var upMenuItem = new MenuItem { Header = GetStr("Str_NavigateUp") };
                 upMenuItem.Click += (s, e) => NavigateUp();
                 contextMenu.Items.Add(upMenuItem);
                 contextMenu.Items.Add(new Separator());
@@ -673,6 +779,10 @@ namespace StorageHandler.Views {
                 Debug.WriteLine($"NavigateToContainer: Loading items for {_currentActiveContainer.Name}");
                 var items = _storageLoader.LoadItems(_currentActiveContainer.Name);
                 _currentActiveContainer.Items = items;
+                
+                // Generate columns dynamically based on available models (schema)
+                GenerateItemsGridColumns();
+
                 ItemsGrid.ItemsSource = items;
             } else {
                 // Switch to Box View
@@ -926,6 +1036,114 @@ namespace StorageHandler.Views {
             NavigateToContainer(_currentActiveContainer);
         }
 
+        private void GenerateItemsGridColumns() {
+            ItemsGrid.Columns.Clear();
+
+            // Determine available keys dynamically
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            // Scan AvailableModels (Catalog)
+            foreach (var model in AvailableModels.Take(50)) {
+                if (!string.IsNullOrEmpty(model.Category)) keys.Add("Category");
+                
+                foreach (var key in model.CustomData.Keys) {
+                    keys.Add(key);
+                }
+            }
+
+            // Scan current items (Inventory)
+            if (_currentActiveContainer != null && _currentActiveContainer.Items != null) {
+                 foreach (var item in _currentActiveContainer.Items.Take(50)) {
+                     if (!string.IsNullOrEmpty(item.Id)) keys.Add("Id");
+                     if (!string.IsNullOrEmpty(item.Category)) keys.Add("Category");
+
+                     foreach (var key in item.CustomData.Keys) {
+                         keys.Add(key);
+                     }
+                 }
+            }
+
+            // Always ensure Quantity is present for storage
+            keys.Add("Quantity");
+
+            // Sort keys: Id first, then standard, then custom, Quantity last
+            var sortedKeys = keys.OrderBy(k => {
+                if (k.Equals("Id", StringComparison.OrdinalIgnoreCase)) return 0;
+                if (k.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) return 1;
+                if (k.Equals("Category", StringComparison.OrdinalIgnoreCase)) return 2;
+                if (k.Equals("Description", StringComparison.OrdinalIgnoreCase)) return 3;
+                if (k.Equals("Value", StringComparison.OrdinalIgnoreCase)) return 4;
+                if (k.Equals("Type", StringComparison.OrdinalIgnoreCase)) return 5;
+                if (k.Equals("Quantity", StringComparison.OrdinalIgnoreCase)) return 99;
+                return 10;
+            }).ToList();
+
+            // Create columns
+            foreach (var key in sortedKeys) {
+                DataGridColumn column;
+
+                if (key.Equals("DatasheetLink", StringComparison.OrdinalIgnoreCase)) {
+                    // Special template column for Datasheet
+                    var templateColumn = new DataGridTemplateColumn {
+                        Header = GetStr("Str_Datasheet"),
+                        Width = 80,
+                        IsReadOnly = true,
+                        SortMemberPath = $"CustomData[{key}]" // Enable sorting for template column
+                    };
+                    
+                    // Create DataTemplate in code
+                    var dataTemplate = new DataTemplate();
+                    var buttonFactory = new FrameworkElementFactory(typeof(Button));
+                    buttonFactory.SetValue(Button.ContentProperty, "📄");
+                    buttonFactory.SetValue(Button.ToolTipProperty, new Binding($"CustomData[{key}]"));
+                    buttonFactory.SetValue(Button.VisibilityProperty, new Binding($"CustomData[{key}]") { Converter = (IValueConverter)FindResource("StringToVisibilityConverter") });
+                    buttonFactory.SetValue(Button.BackgroundProperty, Brushes.Transparent);
+                    buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
+                    buttonFactory.SetValue(Button.ForegroundProperty, FindResource("PrimaryBrush"));
+                    buttonFactory.SetValue(Button.FontSizeProperty, 16.0);
+                    buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(OpenDatasheet_Click));
+                    
+                    dataTemplate.VisualTree = buttonFactory;
+                    templateColumn.CellTemplate = dataTemplate;
+                    column = templateColumn;
+                } else {
+                    var textColumn = new DataGridTextColumn {
+                        Header = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key),
+                        Width = new DataGridLength(1, DataGridLengthUnitType.Star)
+                    };
+
+                    if (key == "Id" || key == "Category" || key == "Quantity") {
+                        textColumn.Binding = new Binding(key);
+                        if (key != "Quantity") textColumn.IsReadOnly = true; // Only Quantity is editable in this view
+                    } else {
+                        textColumn.Binding = new Binding($"CustomData[{key}]");
+                        textColumn.IsReadOnly = true;
+                    }
+                    column = textColumn;
+                }
+
+                // Special widths
+                if (key.Equals("Description", StringComparison.OrdinalIgnoreCase)) column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
+                if (key.Equals("Quantity", StringComparison.OrdinalIgnoreCase)) column.Width = 60;
+                if (key.Equals("Value", StringComparison.OrdinalIgnoreCase)) column.Width = 100;
+                if (key.Equals("Type", StringComparison.OrdinalIgnoreCase)) column.Width = 120;
+                if (key.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) column.Width = 150;
+                if (key.Equals("Category", StringComparison.OrdinalIgnoreCase)) column.Width = 150;
+                if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) column.Width = 120;
+
+                // Default Sort for ID
+                if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) {
+                    column.SortDirection = ListSortDirection.Ascending;
+                }
+
+                ItemsGrid.Columns.Add(column);
+            }
+
+            // Apply initial sort
+            ItemsGrid.Items.SortDescriptions.Clear();
+            ItemsGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Ascending));
+        }
+
         private void AddItem_Click(object sender, RoutedEventArgs e) {
             if (_currentActiveContainer == null || !_currentActiveContainer.IsItemContainer || _storageLoader == null) return;
 
@@ -939,8 +1157,28 @@ namespace StorageHandler.Views {
 
                 if (_currentActiveContainer.Items == null) _currentActiveContainer.Items = new List<StorageItem>();
 
+                // Determine ID
+                string id = "";
+                // Find definition for current category
+                var def = AvailableComponents.FirstOrDefault(c => c.Name.Equals(_currentActiveContainer.Name, StringComparison.OrdinalIgnoreCase));
+                if (def != null) {
+                    string idCol = def.IdColumn;
+                    // Try to find value in model
+                    if (idCol.Equals("Category", StringComparison.OrdinalIgnoreCase)) id = model.Category;
+                    else if (model.CustomData.ContainsKey(idCol)) id = model.CustomData[idCol];
+                    
+                    // Fallback if ID is still empty but we have a "id" field in custom data
+                    if (string.IsNullOrEmpty(id) && model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
+                }
+
+                if (string.IsNullOrEmpty(id)) {
+                     // Fallback to ModelNumber if ID not found, or any other unique field
+                     if (model.CustomData.ContainsKey("ModelNumber")) id = model.CustomData["ModelNumber"];
+                     else if (model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
+                }
+
                 // Check if item already exists
-                var existingItem = _currentActiveContainer.Items.FirstOrDefault(i => i.ModelNumber == model.ModelNumber);
+                var existingItem = _currentActiveContainer.Items.FirstOrDefault(i => i.Id == id);
 
                 if (existingItem != null) {
                     // Update quantity
@@ -948,13 +1186,10 @@ namespace StorageHandler.Views {
                 } else {
                     // Add new item
                     var newItem = new StorageItem {
+                        Id = id,
                         Category = model.Category,
-                        ModelNumber = model.ModelNumber,
-                        Type = model.Type,
-                        Value = model.Value,
-                        Description = model.Description,
-                        DatasheetLink = model.DatasheetLink,
-                        Quantity = quantityToAdd
+                        Quantity = quantityToAdd,
+                        CustomData = new Dictionary<string, string>(model.CustomData)
                     };
                     _currentActiveContainer.Items.Add(newItem);
                 }
@@ -965,14 +1200,10 @@ namespace StorageHandler.Views {
                 ItemsGrid.ItemsSource = null;
                 ItemsGrid.ItemsSource = _currentActiveContainer.Items;
 
-                // Also save models if any new ones were created in the window
-                _storageLoader.SaveModels(new List<ComponentModel>(AvailableModels));
-                
                 // Save components in case categories were managed
                 _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
             } else {
-                // Even if cancelled, save components/models in case they were modified in the management windows
-                _storageLoader.SaveModels(new List<ComponentModel>(AvailableModels));
+                // Even if cancelled, save components in case they were modified in the management windows
                 _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
             }
         }
@@ -995,14 +1226,8 @@ namespace StorageHandler.Views {
             Dispatcher.BeginInvoke(new Action(() => {
                 if (e.Row.Item is StorageItem item) {
                     // If Model Number matches a known model, update other fields
-                    var model = AvailableModels.FirstOrDefault(m => m.ModelNumber == item.ModelNumber);
-                    if (model != null) {
-                        // Update fields to match model
-                        if (item.Type != model.Type) item.Type = model.Type;
-                        if (item.Value != model.Value) item.Value = model.Value;
-                        if (item.Description != model.Description) item.Description = model.Description;
-                        if (item.DatasheetLink != model.DatasheetLink) item.DatasheetLink = model.DatasheetLink;
-                    }
+                    // This logic is now tricky because we don't have hardcoded fields.
+                    // We'll skip auto-updating for now unless we want to match by ID.
                 }
 
                 if (_currentActiveContainer != null && _currentActiveContainer.IsItemContainer && _storageLoader != null) {
@@ -1015,15 +1240,15 @@ namespace StorageHandler.Views {
 
         private void OpenDatasheet_Click(object sender, RoutedEventArgs e) {
             if (sender is Button button && button.DataContext is StorageItem item) {
-                if (!string.IsNullOrEmpty(item.DatasheetLink)) {
+                if (item.CustomData.TryGetValue("DatasheetLink", out string? link) && !string.IsNullOrEmpty(link)) {
                     try {
                         var psi = new ProcessStartInfo {
-                            FileName = item.DatasheetLink,
+                            FileName = link,
                             UseShellExecute = true
                         };
                         Process.Start(psi);
                     } catch (Exception ex) {
-                        MessageBox.Show($"Could not open link: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(string.Format(GetStr("Str_LinkError"), ex.Message), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -1031,8 +1256,8 @@ namespace StorageHandler.Views {
 
         private void CloseApp_Click(object sender, RoutedEventArgs e) {
             if (_storageLoader != null && _storageLoader.HasUnsavedChanges) {
-                var result = MessageBox.Show("You have unsaved changes. Do you want to save before closing?", 
-                                             "Unsaved Changes", 
+                var result = MessageBox.Show(GetStr("Str_UnsavedChangesMsg"), 
+                                             GetStr("Str_UnsavedChangesTitle"), 
                                              MessageBoxButton.YesNoCancel, 
                                              MessageBoxImage.Warning);
                 

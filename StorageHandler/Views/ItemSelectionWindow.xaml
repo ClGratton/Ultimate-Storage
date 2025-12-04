@@ -50,24 +50,10 @@
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,20,0">
             <TextBlock Text="{DynamicResource Str_Filters}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
             
-            <TextBlock Text="{DynamicResource Str_Category}" Foreground="White" Margin="0,0,0,5"/>
-            <ComboBox x:Name="CategoryFilter" DisplayMemberPath="Name" SelectedValuePath="Name" SelectionChanged="Filter_Changed"/>
+            <!-- Dynamic Filters could be added here, but user requested removal of specific filters -->
+            <!-- We will keep the buttons for management -->
 
-            <TextBlock Text="{DynamicResource Str_Type}" Foreground="White" Margin="0,0,0,5"/>
-            <TextBox x:Name="TypeFilter" TextChanged="Filter_Changed" Margin="0,0,0,10"/>
-
-            <TextBlock Text="{DynamicResource Str_Value}" Foreground="White" Margin="0,0,0,5"/>
-            <TextBox x:Name="ValueFilter" TextChanged="Filter_Changed" Margin="0,0,0,10"/>
-
-            <Button Content="{DynamicResource Str_ClearFilters}" Click="ClearFilters_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="30" Margin="0,10,0,0">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-            
-            <Button Content="{DynamicResource Str_ManageCategories}" Click="ManageCategories_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="40" Margin="0,40,0,0">
+            <Button Content="{DynamicResource Str_ManageCategories}" Click="ManageCategories_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="40" Margin="0,0,0,0">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
@@ -76,14 +62,6 @@
             </Button>
 
             <Button Content="{DynamicResource Str_CreateNewModel}" Click="CreateNewModel_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="40" Margin="0,10,0,0">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-
-            <Button Content="{DynamicResource Str_ImportCommonParts}" Click="ImportCommonParts_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextBlackBrush}" BorderThickness="0" Height="40" Margin="0,10,0,0">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
@@ -126,13 +104,7 @@
                         <MenuItem Header="Delete" Click="DeleteModel_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="{DynamicResource Str_ModelNumber}" Binding="{Binding ModelNumber}" Width="150"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Category}" Binding="{Binding Category}" Width="100"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Type}" Binding="{Binding Type}" Width="100"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Value}" Binding="{Binding Value}" Width="80"/>
-                    <DataGridTextColumn Header="{DynamicResource Str_Description}" Binding="{Binding Description}" Width="*"/>
-                </DataGrid.Columns>
+                <!-- Columns will be generated dynamically in code -->
             </DataGrid>
         </Grid>
 

@@ -2,12 +2,23 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using StorageHandler.Config;
 using StorageHandler.Scripts;
 
 namespace StorageHandler {
     public partial class App : Application {
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
+
+            // Load Configuration
+            ConfigManager.Load();
+
+            // Generate Test Data
+            string dbRoot = Path.Combine(AppContext.BaseDirectory, "Database");
+            ApiEmulator.GenerateTestFiles(dbRoot);
+
+            // Apply Language
+            ApplyLanguage(ConfigManager.Current.Language);
 
             // Delete any temp files at startup
             /*
@@ -33,6 +44,38 @@ namespace StorageHandler {
                 Debug.WriteLine($"App: Error cleaning up temporary files at startup: {ex.Message}");
             }
             */
+        }
+
+        private void ApplyLanguage(string languageCode) {
+            string dictPath = "pack://application:,,,/Resources/Strings.xaml"; // Default English
+            
+            if (languageCode.Equals("it-IT", StringComparison.OrdinalIgnoreCase)) {
+                dictPath = "pack://application:,,,/Resources/Strings.it.xaml";
+            }
+
+            try {
+                var dict = new ResourceDictionary { Source = new Uri(dictPath, UriKind.Absolute) };
+                
+                // Find and replace the existing Strings dictionary
+                // We assume it's one of the merged dictionaries
+                ResourceDictionary? oldDict = null;
+                foreach (var d in Resources.MergedDictionaries) {
+                    if (d.Source != null && d.Source.OriginalString.Contains("Strings")) {
+                        oldDict = d;
+                        break;
+                    }
+                }
+
+                if (oldDict != null) {
+                    Resources.MergedDictionaries.Remove(oldDict);
+                }
+                
+                Resources.MergedDictionaries.Add(dict);
+                Debug.WriteLine($"App: Applied language dictionary: {dictPath}");
+            } catch (Exception ex) {
+                Debug.WriteLine($"App: Failed to apply language {languageCode}: {ex.Message}");
+                MessageBox.Show($"Failed to load language: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         protected override void OnExit(ExitEventArgs e) {

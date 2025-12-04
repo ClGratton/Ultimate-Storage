@@ -32,6 +32,10 @@ namespace StorageHandler.Scripts {
         private const double DragPixelThreshold = 2.0; // ignore sub-pixel jitters
         private static readonly JsonSerializerOptions JsonOptionsIndented = new() { WriteIndented = true };
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public StorageBoxDrag(Canvas storageGrid, StorageLoader storageLoader, StorageContainer rootContainer, BoxResizer boxResizer, Action? refreshUi = null) {
             _storageGrid = storageGrid;
             _storageLoader = storageLoader;
@@ -156,7 +160,7 @@ namespace StorageHandler.Scripts {
                                 RestoreBoxPosition(container);
                             }
                         } else {
-                            MessageBox.Show("Cannot put a box into an item list.", "Invalid Operation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            MessageBox.Show(GetStr("Str_BoxInItemListError"), GetStr("Str_InvalidOp"), MessageBoxButton.OK, MessageBoxImage.Warning);
                             RestoreBoxPosition(container);
                         }
                     } else {
@@ -226,8 +230,8 @@ namespace StorageHandler.Scripts {
 
         private bool ConfirmMerge(StorageContainer source, StorageContainer target) {
             var result = MessageBox.Show(
-                $"Do you want to merge the items from '{source.Name}' into '{target.Name}'?\n\n'{source.Name}' will be removed.",
-                "Merge Item Lists",
+                string.Format(GetStr("Str_MergeMsg"), source.Name, target.Name),
+                GetStr("Str_MergeTitle"),
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question
             );
@@ -240,7 +244,7 @@ namespace StorageHandler.Scripts {
                 var targetItems = _storageLoader.LoadItems(target.Name);
 
                 foreach (var sourceItem in sourceItems) {
-                    var existingItem = targetItems.FirstOrDefault(t => t.ModelNumber == sourceItem.ModelNumber);
+                    var existingItem = targetItems.FirstOrDefault(t => t.Id == sourceItem.Id);
                     if (existingItem != null) {
                         existingItem.Quantity += sourceItem.Quantity;
                     } else {
@@ -267,7 +271,7 @@ namespace StorageHandler.Scripts {
                 _refreshUi?.Invoke();
 
             } catch (Exception ex) {
-                MessageBox.Show($"Error merging items: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(GetStr("Str_MergeError"), ex.Message), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                 RestoreBoxPosition(source);
             }
         }
@@ -355,8 +359,8 @@ namespace StorageHandler.Scripts {
         private bool ConfirmMakeChildBox(StorageContainer boxToMove, StorageContainer targetParent) {
             if (IsDescendantOf(targetParent, boxToMove)) {
                 MessageBox.Show(
-                    $"Cannot make {targetParent.Name} a child of {boxToMove.Name} as it would create a circular reference.",
-                    "Invalid Operation",
+                    string.Format(GetStr("Str_CircularRefError"), targetParent.Name, boxToMove.Name),
+                    GetStr("Str_InvalidOp"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning
                 );
@@ -366,12 +370,12 @@ namespace StorageHandler.Scripts {
             var directChildCount = boxToMove.Children.Count;
             var totalDescendants = CountTotalDescendants(boxToMove);
 
-            var message = $"Do you want to make '{boxToMove.Name}' a child of '{targetParent.Name}'?";
+            var message = string.Format(GetStr("Str_MakeChildBoxMsg"), boxToMove.Name, targetParent.Name);
             if (directChildCount > 0) {
-                message += $"\n\nThis will also move {directChildCount} direct child box(es) and {totalDescendants - directChildCount} additional descendant(s).";
+                message += string.Format(GetStr("Str_MakeChildBoxMsgDetails"), directChildCount, totalDescendants - directChildCount);
             }
 
-            var result = MessageBox.Show(message, "Make Child Box", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var result = MessageBox.Show(message, GetStr("Str_MakeChildBoxTitle"), MessageBoxButton.YesNo, MessageBoxImage.Question);
             return result == MessageBoxResult.Yes;
         }
 
@@ -442,8 +446,8 @@ namespace StorageHandler.Scripts {
                 }
 
                 MessageBox.Show(
-                    $"Box '{boxToMove.Name}' is now a child of '{newParent.Name}'.\n\nDouble-click on the parent box to navigate into it and see its children.",
-                    "Box Structure Updated",
+                    string.Format(GetStr("Str_BoxChildSuccess"), boxToMove.Name, newParent.Name),
+                    GetStr("Str_BoxStructureUpdated"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information
                 );

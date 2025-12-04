@@ -38,54 +38,54 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Create New Model" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+        <TextBlock Text="{DynamicResource Str_CreateNewModel}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
 
         <!-- Component Selection -->
         <StackPanel Grid.Row="1" Margin="0,0,0,15">
-            <TextBlock Text="Component Category" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_ComponentCategory}" Foreground="White" Margin="0,0,0,5"/>
             <ComboBox x:Name="ComponentCombo" Height="30" DisplayMemberPath="Name" SelectedValuePath="Name"/>
         </StackPanel>
 
         <!-- Model Number -->
         <StackPanel Grid.Row="2" Margin="0,0,0,15">
-            <TextBlock Text="Model Number (e.g. RC0603-10K)" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_ModelNumberPrompt}" Foreground="White" Margin="0,0,0,5"/>
             <TextBox x:Name="ModelNumberBox" Height="30" VerticalContentAlignment="Center" Padding="5"/>
         </StackPanel>
 
         <!-- Datasheet Link -->
         <StackPanel Grid.Row="3" Margin="0,0,0,15">
-            <TextBlock Text="Datasheet Link (URL)" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_DatasheetPrompt}" Foreground="White" Margin="0,0,0,5"/>
             <TextBox x:Name="DatasheetBox" Height="30" VerticalContentAlignment="Center" Padding="5"/>
         </StackPanel>
 
         <!-- Type -->
         <StackPanel Grid.Row="4" Margin="0,0,0,15">
-            <TextBlock Text="Type (e.g. Ceramic)" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_TypePrompt}" Foreground="White" Margin="0,0,0,5"/>
             <TextBox x:Name="TypeBox" Height="30" VerticalContentAlignment="Center" Padding="5"/>
         </StackPanel>
 
         <!-- Value -->
         <StackPanel Grid.Row="5" Margin="0,0,0,15">
-            <TextBlock Text="Value (e.g. 10k)" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_ValuePrompt}" Foreground="White" Margin="0,0,0,5"/>
             <TextBox x:Name="ValueBox" Height="30" VerticalContentAlignment="Center" Padding="5"/>
         </StackPanel>
 
         <!-- Description -->
         <StackPanel Grid.Row="6" Margin="0,0,0,15">
-            <TextBlock Text="Description" Foreground="White" Margin="0,0,0,5"/>
+            <TextBlock Text="{DynamicResource Str_Description}" Foreground="White" Margin="0,0,0,5"/>
             <TextBox x:Name="DescriptionBox" Height="60" TextWrapping="Wrap" VerticalContentAlignment="Top" Padding="5"/>
         </StackPanel>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="8" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Cancel" Width="80" Height="30" Margin="0,0,10,0" Click="Cancel_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="30" Margin="0,0,10,0" Click="Cancel_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="5"/>
                     </Style>
                 </Button.Resources>
             </Button>
-            <Button Content="Create" Width="80" Height="30" Click="Create_Click" Background="{DynamicResource PrimaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Create}" Width="80" Height="30" Click="Create_Click" Background="{DynamicResource PrimaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="5"/>

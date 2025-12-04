@@ -22,6 +22,10 @@ namespace StorageHandler.Scripts {
         }
         private RenameContext? _currentRenameContext;
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public StorageBoxManager(Canvas storageGrid) {
             _storageGrid = storageGrid;
             _storageGrid.PreviewMouseLeftButtonDown += OnPreviewMouseDown;
@@ -289,7 +293,8 @@ namespace StorageHandler.Scripts {
                 Background = Brushes.Transparent,
                 BorderBrush = Brushes.Black,
                 BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(10)
+                CornerRadius = new CornerRadius(10),
+                Tag = "EmptyStatePrompt" // Tag to identify and remove later
             };
 
             var grid = new Grid();
@@ -307,7 +312,7 @@ namespace StorageHandler.Scripts {
             
             var topStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             topStack.Children.Add(new TextBlock { Text = "+", FontWeight = FontWeights.Bold, FontSize = 20, Margin = new Thickness(0, 0, 5, 0) });
-            topStack.Children.Add(new TextBlock { Text = "Box", FontWeight = FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center });
+            topStack.Children.Add(new TextBlock { Text = GetStr("Str_Box"), FontWeight = FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center });
             topBorder.Child = topStack;
             
             topBorder.MouseLeftButtonDown += (s, e) => { onAddBox?.Invoke(); e.Handled = true; };
@@ -322,7 +327,7 @@ namespace StorageHandler.Scripts {
 
             var bottomStack = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             bottomStack.Children.Add(new TextBlock { Text = "+", FontWeight = FontWeights.Bold, FontSize = 20, Margin = new Thickness(0, 0, 5, 0) });
-            bottomStack.Children.Add(new TextBlock { Text = "Item List", FontWeight = FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center });
+            bottomStack.Children.Add(new TextBlock { Text = GetStr("Str_ItemList"), FontWeight = FontWeights.Bold, VerticalAlignment = VerticalAlignment.Center });
             bottomBorder.Child = bottomStack;
 
             bottomBorder.MouseLeftButtonDown += (s, e) => { onConvertToList?.Invoke(); e.Handled = true; };
@@ -339,6 +344,13 @@ namespace StorageHandler.Scripts {
             Canvas.SetTop(containerBorder, top);
 
             _storageGrid.Children.Add(containerBorder);
+        }
+
+        public void HideEmptyStatePrompt() {
+            var prompt = _storageGrid.Children.OfType<Border>().FirstOrDefault(b => b.Tag as string == "EmptyStatePrompt");
+            if (prompt != null) {
+                _storageGrid.Children.Remove(prompt);
+            }
         }
     }
 }

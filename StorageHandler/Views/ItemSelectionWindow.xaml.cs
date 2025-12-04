@@ -18,6 +18,10 @@ namespace StorageHandler.Views {
         public ComponentModel? SelectedModel { get; private set; }
         public int SelectedQuantity { get; private set; } = 1;
 
+        private string GetStr(string key) {
+            return Application.Current.TryFindResource(key) as string ?? key;
+        }
+
         public ItemSelectionWindow(ObservableCollection<ComponentModel> models, ObservableCollection<ComponentDefinition> components) {
             InitializeComponent();
             
@@ -28,48 +32,75 @@ namespace StorageHandler.Views {
             _modelsView = CollectionViewSource.GetDefaultView(_allModels);
             _modelsView.Filter = FilterModels;
             
-            // Sort by Model Number by default
-            _modelsView.SortDescriptions.Add(new SortDescription("ModelNumber", ListSortDirection.Ascending));
-            
             ModelsGrid.ItemsSource = _modelsView;
 
-            RefreshCategoryFilter();
+            // Generate columns dynamically
+            GenerateColumns();
         }
 
-        private void RefreshCategoryFilter() {
-            // Setup Filters - Dynamic based on available items
-            var categories = _allModels
-                .Select(m => m.Category)
-                .Where(n => !string.IsNullOrEmpty(n))
-                .Distinct()
-                .OrderBy(n => n)
-                .Select(n => new ComponentDefinition { Name = n })
-                .ToList();
+        private void GenerateColumns() {
+            ModelsGrid.Columns.Clear();
 
-            var filterComponents = new List<ComponentDefinition> { new ComponentDefinition { Name = "All Categories" } };
-            filterComponents.AddRange(categories);
+            // Determine available keys dynamically by scanning the data
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             
-            CategoryFilter.ItemsSource = filterComponents;
-            CategoryFilter.SelectedIndex = 0;
+            foreach (var model in _allModels.Take(50)) {
+                if (!string.IsNullOrEmpty(model.Category)) keys.Add("Category");
+                
+                foreach (var key in model.CustomData.Keys) {
+                    keys.Add(key);
+                }
+            }
+
+            // Sort keys: Id first, then standard, then custom
+            var sortedKeys = keys.OrderBy(k => {
+                if (k.Equals("Id", StringComparison.OrdinalIgnoreCase)) return 0;
+                if (k.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) return 1;
+                if (k.Equals("Category", StringComparison.OrdinalIgnoreCase)) return 2;
+                if (k.Equals("Description", StringComparison.OrdinalIgnoreCase)) return 3;
+                if (k.Equals("Value", StringComparison.OrdinalIgnoreCase)) return 4;
+                if (k.Equals("Type", StringComparison.OrdinalIgnoreCase)) return 5;
+                return 10;
+            }).ToList();
+
+            // Create columns
+            string defaultSortHeader = "Category";
+            if (keys.Contains("id")) defaultSortHeader = "id";
+            else if (keys.Contains("ModelNumber")) defaultSortHeader = "ModelNumber";
+
+            foreach (var key in sortedKeys) {
+                var column = new DataGridTextColumn {
+                    Header = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star)
+                };
+
+                if (key == "Category") {
+                    column.Binding = new Binding(key);
+                } else {
+                    column.Binding = new Binding($"CustomData[{key}]");
+                }
+
+                // Special width for Description
+                if (key == "Description") column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
+                if (key == "Id") column.Width = 120;
+                if (key == "Value") column.Width = 80;
+                if (key == "Package") column.Width = 80;
+                
+                if (key.Equals(defaultSortHeader, StringComparison.OrdinalIgnoreCase)) {
+                    column.SortDirection = ListSortDirection.Ascending;
+                }
+
+                ModelsGrid.Columns.Add(column);
+            }
+
+            // Apply default sort
+            _modelsView.SortDescriptions.Clear();
+            string sortProperty = defaultSortHeader == "Category" ? "Category" : $"CustomData[{defaultSortHeader}]";
+            _modelsView.SortDescriptions.Add(new SortDescription(sortProperty, ListSortDirection.Ascending));
         }
 
         private bool FilterModels(object item) {
             if (item is not ComponentModel model) return false;
-
-            // Category Filter
-            if (CategoryFilter.SelectedValue is string category && category != "All Categories") {
-                if (model.Category != category) return false;
-            }
-
-            // Type Filter
-            if (!string.IsNullOrWhiteSpace(TypeFilter.Text)) {
-                if (string.IsNullOrEmpty(model.Type) || !model.Type.Contains(TypeFilter.Text, StringComparison.OrdinalIgnoreCase)) return false;
-            }
-
-            // Value Filter
-            if (!string.IsNullOrWhiteSpace(ValueFilter.Text)) {
-                if (string.IsNullOrEmpty(model.Value) || !model.Value.Contains(ValueFilter.Text, StringComparison.OrdinalIgnoreCase)) return false;
-            }
 
             // Search Box (Multi-token search across all attributes)
             if (!string.IsNullOrWhiteSpace(SearchBox.Text)) {
@@ -78,12 +109,18 @@ namespace StorageHandler.Views {
                 foreach (var term in searchTerms) {
                     bool termFound = false;
                     
-                    // Check all relevant properties
-                    if (model.ModelNumber?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
-                    else if (model.Description?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
-                    else if (model.Category?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true; // Category
-                    else if (model.Type?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
-                    else if (model.Value?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
+                    // Check standard properties
+                    if (model.Category?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
+                    
+                    // Check custom data
+                    if (!termFound) {
+                        foreach (var value in model.CustomData.Values) {
+                            if (value.Contains(term, StringComparison.OrdinalIgnoreCase)) {
+                                termFound = true;
+                                break;
+                            }
+                        }
+                    }
                     
                     if (!termFound) return false; // If any term is missing, it's not a match
                 }
@@ -97,9 +134,6 @@ namespace StorageHandler.Views {
         }
 
         private void ClearFilters_Click(object sender, RoutedEventArgs e) {
-            CategoryFilter.SelectedIndex = 0;
-            TypeFilter.Text = string.Empty;
-            ValueFilter.Text = string.Empty;
             SearchBox.Text = string.Empty;
             _modelsView.Refresh();
         }
@@ -108,9 +142,6 @@ namespace StorageHandler.Views {
             var window = new ManageCategoriesWindow(_components);
             window.Owner = this;
             window.ShowDialog();
-            
-            // Refresh the filter dropdown after managing categories
-            RefreshCategoryFilter();
         }
 
         private void CreateNewModel_Click(object sender, RoutedEventArgs e) {
@@ -121,57 +152,30 @@ namespace StorageHandler.Views {
                 
                 if (newModel != null) {
                     // Check if exists
-                    if (!_allModels.Any(m => m.ModelNumber == newModel.ModelNumber)) {
+                    string newModelNum = newModel.CustomData.ContainsKey("ModelNumber") ? newModel.CustomData["ModelNumber"] : "";
+                    bool exists = false;
+                    if (!string.IsNullOrEmpty(newModelNum)) {
+                         exists = _allModels.Any(m => m.CustomData.ContainsKey("ModelNumber") && m.CustomData["ModelNumber"] == newModelNum);
+                    }
+
+                    if (!exists) {
                         _allModels.Add(newModel);
                         
                         // Select the new model
-                        RefreshCategoryFilter(); // Update filter in case of new category
-                        CategoryFilter.SelectedValue = newModel.Category;
-                        SearchBox.Text = newModel.ModelNumber;
+                        SearchBox.Text = newModelNum;
                         _modelsView.Refresh();
+                        GenerateColumns(); // Regenerate columns in case new fields were added
                     } else {
-                        MessageBox.Show("Model already exists.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(GetStr("Str_ModelExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                }
-            }
-        }
-
-        private void ImportCommonParts_Click(object sender, RoutedEventArgs e) {
-            var result = MessageBox.Show("This will import common electronic components (Resistors, Capacitors, LEDs, ICs) into your database. Existing models with the same number will be skipped.\n\nContinue?", "Import Database", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            
-            if (result == MessageBoxResult.Yes) {
-                var commonModels = DatabaseSeeder.GetCommonModels();
-                int addedCount = 0;
-
-                foreach (var model in commonModels) {
-                    if (!_allModels.Any(m => m.ModelNumber == model.ModelNumber)) {
-                        _allModels.Add(model);
-                        addedCount++;
-                    }
-                }
-
-                // Also import categories
-                var commonCategories = DatabaseSeeder.GetCommonCategories();
-                foreach (var cat in commonCategories) {
-                    if (!_components.Any(c => c.Name == cat.Name)) {
-                        _components.Add(cat);
-                    }
-                }
-                
-                RefreshCategoryFilter(); // Update filter with new items/categories
-
-                if (addedCount > 0) {
-                    MessageBox.Show($"Successfully imported {addedCount} new models and updated categories.", "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
-                    _modelsView.Refresh();
-                } else {
-                    MessageBox.Show("No new models were added (all already exist). Categories updated.", "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
 
         private void DeleteModel_Click(object sender, RoutedEventArgs e) {
             if (ModelsGrid.SelectedItem is ComponentModel model) {
-                var result = MessageBox.Show($"Are you sure you want to delete model {model.ModelNumber}?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                string modelNum = model.CustomData.ContainsKey("ModelNumber") ? model.CustomData["ModelNumber"] : "Unknown";
+                var result = MessageBox.Show(string.Format(GetStr("Str_ConfirmDeleteModel"), modelNum), GetStr("Str_ConfirmDeleteCategory"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes) {
                     _allModels.Remove(model);
                     _modelsView.Refresh();
@@ -184,7 +188,7 @@ namespace StorageHandler.Views {
                 if (int.TryParse(QuantityBox.Text, out int qty) && qty > 0) {
                     SelectedQuantity = qty;
                 } else {
-                    MessageBox.Show("Please enter a valid quantity.", "Invalid Quantity", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(GetStr("Str_InvalidQty"), GetStr("Str_InvalidQtyTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -192,7 +196,7 @@ namespace StorageHandler.Views {
                 DialogResult = true;
                 Close();
             } else {
-                MessageBox.Show("Please select a model from the list.", "Selection Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(GetStr("Str_SelectModelMsg"), GetStr("Str_SelectionRequired"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

@@ -24,7 +24,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Manage Categories" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
+        <TextBlock Text="{DynamicResource Str_ManageCategories}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="20" FontWeight="Bold" Margin="0,0,0,15"/>
 
         <ListBox x:Name="CategoriesList" Grid.Row="1" DisplayMemberPath="Name" SelectionMode="Single"/>
 
@@ -35,7 +35,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBox x:Name="NewCategoryBox" Height="30" VerticalContentAlignment="Center" Padding="5" Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0"/>
-                <Button Content="Add" Width="60" Height="30" Margin="10,0,0,0" Click="Add_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+                <Button Content="{DynamicResource Str_Add}" Width="60" Height="30" Margin="10,0,0,0" Click="Add_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="5"/>
@@ -44,7 +44,7 @@
                 </Button>
             </Grid>
 
-            <Button Content="Delete Selected" Height="30" Click="Delete_Click" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Margin="0,0,0,10">
+            <Button Content="{DynamicResource Str_DeleteSelected}" Height="30" Click="Delete_Click" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Margin="0,0,0,10">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="5"/>
@@ -52,15 +52,7 @@
                 </Button.Resources>
             </Button>
 
-            <Button Content="Import Common Categories" Height="30" Click="Import_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextBlackBrush}" BorderThickness="0" Margin="0,0,0,10">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-
-            <Button Content="Close" Height="30" Click="Close_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Close}" Height="30" Click="Close_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
                         <Setter Property="CornerRadius" Value="5"/>
