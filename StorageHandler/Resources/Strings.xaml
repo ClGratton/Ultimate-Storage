@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- General -->
+    <system:String x:Key="Str_Back">Back</system:String>
+    <system:String x:Key="Str_Cancel">Cancel</system:String>
+    <system:String x:Key="Str_Add">Add</system:String>
+    <system:String x:Key="Str_Delete">Delete</system:String>
+    <system:String x:Key="Str_SearchPlaceholder">Search through the whole storage...</system:String>
+    <system:String x:Key="Str_SearchModelPlaceholder">Search by Model Number or Description...</system:String>
+
+    <!-- Categories -->
+    <system:String x:Key="Str_Electronics">Electronics</system:String>
+    <system:String x:Key="Str_Yugioh">Yu-Gi-Oh</system:String>
+    <system:String x:Key="Str_Filament">Filament</system:String>
+
+    <!-- DataGrid Headers -->
+    <system:String x:Key="Str_Component">Component</system:String>
+    <system:String x:Key="Str_ModelNumber">Model Number</system:String>
+    <system:String x:Key="Str_Datasheet">Datasheet</system:String>
+    <system:String x:Key="Str_Type">Type</system:String>
+    <system:String x:Key="Str_Value">Value</system:String>
+    <system:String x:Key="Str_Qty">Qty</system:String>
+    <system:String x:Key="Str_Description">Description</system:String>
+    <system:String x:Key="Str_Category">Category</system:String>
+
+    <!-- Context Menu -->
+    <system:String x:Key="Str_AddItem">Add Item</system:String>
+    <system:String x:Key="Str_DeleteItem">Delete Item</system:String>
+
+    <!-- Item Selection Window -->
+    <system:String x:Key="Str_SelectComponent">Select Component Model</system:String>
+    <system:String x:Key="Str_Filters">Filters</system:String>
+    <system:String x:Key="Str_ClearFilters">Clear Filters</system:String>
+    <system:String x:Key="Str_ManageCategories">Manage Categories...</system:String>
+    <system:String x:Key="Str_CreateNewModel">Create New Model...</system:String>
+    <system:String x:Key="Str_ImportCommonParts">Import Common Parts</system:String>
+    <system:String x:Key="Str_AddSelected">Add Selected</system:String>
+
+</ResourceDictionary>

@@ -4,15 +4,19 @@ using System.Windows;
 
 namespace StorageHandler.Scripts {
     public class StorageDisplayManager {
-        private readonly StorageLoader _storageLoader;
+        private StorageLoader _storageLoader;
         private readonly StorageBoxManager _boxManager;
         private readonly Canvas _storageGrid;
-        private StorageContainer _rootContainer;
+        private StorageContainer? _rootContainer;
 
         public StorageDisplayManager(StorageLoader storageLoader, StorageBoxManager boxManager, Canvas storageGrid) {
             _storageLoader = storageLoader;
             _boxManager = boxManager;
             _storageGrid = storageGrid;
+        }
+
+        public void UpdateLoader(StorageLoader loader) {
+            _storageLoader = loader;
         }
 
         public void LoadAndDisplayStorage() {
@@ -33,7 +37,7 @@ namespace StorageHandler.Scripts {
         }
 
 
-        public StorageContainer GetCurrentStorage() {
+        public StorageContainer? GetCurrentStorage() {
             return _rootContainer;
         }
     }

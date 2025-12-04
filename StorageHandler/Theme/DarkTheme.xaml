@@ -1,0 +1,117 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- =================================================================== -->
+    <!-- COLORS -->
+    <!-- =================================================================== -->
+    
+    <!-- Backgrounds -->
+    <Color x:Key="WindowBackgroundColor">#212529</Color>
+    <Color x:Key="ControlBackgroundColor">#343A40</Color>
+    <Color x:Key="ControlAltBackgroundColor">#3D444B</Color>
+    <Color x:Key="InputBackgroundColor">#343A40</Color>
+    <Color x:Key="HoverBackgroundColor">#25292d</Color>
+    <Color x:Key="CheckedBackgroundColor">#2d3136</Color>
+    
+    <!-- Accents -->
+    <Color x:Key="PrimaryColor">#7a89c2</Color>
+    <Color x:Key="SecondaryColor">#6C757D</Color>
+    <Color x:Key="DangerColor">#DC3545</Color>
+    
+    <!-- Text -->
+    <Color x:Key="TextPrimaryColor">#FFFFFF</Color>
+    <Color x:Key="TextSecondaryColor">#ADB5BD</Color>
+    <Color x:Key="TextMutedColor">#6C757D</Color>
+    <Color x:Key="TextBlackColor">#000000</Color>
+    <Color x:Key="TextPlaceholderColor">#CFCFCF</Color>
+
+    <!-- Selection (Darker Blue to avoid "bright blue" clash) -->
+    <Color x:Key="SelectionColor">#7a89c2</Color>
+    <Color x:Key="SelectionColor2">#AFA2FF</Color>
+    <Color x:Key="SelectionColor3">#E3D7FF</Color>
+    <Color x:Key="SelectionTextColor">#FFFFFF</Color>
+
+    <!-- =================================================================== -->
+    <!-- BRUSHES -->
+    <!-- =================================================================== -->
+    
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{StaticResource WindowBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlBackgroundBrush" Color="{StaticResource ControlBackgroundColor}"/>
+    <SolidColorBrush x:Key="ControlAltBackgroundBrush" Color="{StaticResource ControlAltBackgroundColor}"/>
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="{StaticResource InputBackgroundColor}"/>
+    <SolidColorBrush x:Key="HoverBackgroundBrush" Color="{StaticResource HoverBackgroundColor}"/>
+    <SolidColorBrush x:Key="CheckedBackgroundBrush" Color="{StaticResource CheckedBackgroundColor}"/>
+    
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}"/>
+    
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}"/>
+    <SolidColorBrush x:Key="TextBlackBrush" Color="{StaticResource TextBlackColor}"/>
+    <SolidColorBrush x:Key="TextPlaceholderBrush" Color="{StaticResource TextPlaceholderColor}"/>
+    
+    <SolidColorBrush x:Key="SelectionBrush" Color="{StaticResource SelectionColor}"/>
+    <SolidColorBrush x:Key="SelectionBrush2" Color="{StaticResource SelectionColor2}"/>
+    <SolidColorBrush x:Key="SelectionBrush3" Color="{StaticResource SelectionColor3}"/>
+    <SolidColorBrush x:Key="SelectionTextBrush" Color="{StaticResource SelectionTextColor}"/>
+
+    <!-- =================================================================== -->
+    <!-- STYLES -->
+    <!-- =================================================================== -->
+
+    <!-- DataGrid Style to fix white background and bright blue selection -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="RowBackground" Value="{DynamicResource WindowBackgroundBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource ControlAltBackgroundBrush}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource ControlAltBackgroundBrush}"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="GridLinesVisibility" Value="All"/>
+    </Style>
+
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlAltBackgroundBrush}"/>
+    </Style>
+
+    <Style TargetType="DataGridCell">
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Border Padding="{TemplateBinding Padding}" 
+                            BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" 
+                            Background="{TemplateBinding Background}" 
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource SelectionTextBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SelectionBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="DataGridRow">
+        <Style.Resources>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{StaticResource SelectionColor}"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource SelectionTextColor}"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{StaticResource ControlAltBackgroundColor}"/>
+            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{StaticResource TextPrimaryColor}"/>
+        </Style.Resources>
+    </Style>
+
+</ResourceDictionary>

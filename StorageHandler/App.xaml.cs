@@ -10,6 +10,7 @@ namespace StorageHandler {
             base.OnStartup(e);
 
             // Delete any temp files at startup
+            /*
             try {
                 string storageDir = Path.Combine(AppContext.BaseDirectory, "Database", "Storage");
                 Debug.WriteLine($"App: Cleaning up temporary files at startup from {storageDir}");
@@ -31,11 +32,13 @@ namespace StorageHandler {
             } catch (Exception ex) {
                 Debug.WriteLine($"App: Error cleaning up temporary files at startup: {ex.Message}");
             }
+            */
         }
 
         protected override void OnExit(ExitEventArgs e) {
             base.OnExit(e);
 
+            /*
             try {
                 // On normal exit, also clean up temp files
                 string storageDir = Path.Combine(AppContext.BaseDirectory, "Database", "Storage");
@@ -44,6 +47,7 @@ namespace StorageHandler {
             } catch (Exception ex) {
                 Debug.WriteLine($"App: Error cleaning up temporary files on exit: {ex.Message}");
             }
+            */
         }
     }
 }

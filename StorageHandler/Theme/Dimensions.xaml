@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Dimensions -->
+    <system:Double x:Key="BaseControlHeight">50</system:Double>
+    <CornerRadius x:Key="BaseCornerRadius">10</CornerRadius>
+    
+    <!-- Calculated Radiuses (approximate based on 0.2 ratio of height) -->
+    <!-- Category Button: Height 50, Radius 10 -->
+    <CornerRadius x:Key="CategoryButtonCornerRadius">10</CornerRadius>
+    
+    <!-- Search Box: Height ~40, Radius 8 -->
+    <CornerRadius x:Key="SearchBoxCornerRadius">8</CornerRadius>
+    
+    <!-- Back Button: Height 30, Radius 6 -->
+    <CornerRadius x:Key="BackButtonCornerRadius">6</CornerRadius>
+    
+    <!-- Standard Button: Height 35-40, Radius 7-8 -->
+    <CornerRadius x:Key="StandardButtonCornerRadius">7</CornerRadius>
+    
+    <!-- Window Radius -->
+    <CornerRadius x:Key="WindowCornerRadius">20</CornerRadius>
+
+    <!-- Margins -->
+    <Thickness x:Key="StandardMargin">10</Thickness>
+    <Thickness x:Key="LargeMargin">20</Thickness>
+    
+</ResourceDictionary>

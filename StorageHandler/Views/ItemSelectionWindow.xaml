@@ -1,0 +1,160 @@
+<Window x:Class="StorageHandler.Views.ItemSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Select Component" Height="750" Width="900"
+        WindowStartupLocation="CenterOwner"
+        Background="#212529">
+    
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#343A40"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource StandardButtonCornerRadius}" Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.ColumnSpan="2" Text="{DynamicResource Str_SelectComponent}" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+        <!-- Left Sidebar: Filters -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,20,0">
+            <TextBlock Text="{DynamicResource Str_Filters}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+            
+            <TextBlock Text="{DynamicResource Str_Category}" Foreground="White" Margin="0,0,0,5"/>
+            <ComboBox x:Name="CategoryFilter" DisplayMemberPath="Name" SelectedValuePath="Name" SelectionChanged="Filter_Changed"/>
+
+            <TextBlock Text="{DynamicResource Str_Type}" Foreground="White" Margin="0,0,0,5"/>
+            <TextBox x:Name="TypeFilter" TextChanged="Filter_Changed" Margin="0,0,0,10"/>
+
+            <TextBlock Text="{DynamicResource Str_Value}" Foreground="White" Margin="0,0,0,5"/>
+            <TextBox x:Name="ValueFilter" TextChanged="Filter_Changed" Margin="0,0,0,10"/>
+
+            <Button Content="{DynamicResource Str_ClearFilters}" Click="ClearFilters_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="30" Margin="0,10,0,0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            
+            <Button Content="{DynamicResource Str_ManageCategories}" Click="ManageCategories_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="40" Margin="0,40,0,0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button Content="{DynamicResource Str_CreateNewModel}" Click="CreateNewModel_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Height="40" Margin="0,10,0,0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <Button Content="{DynamicResource Str_ImportCommonParts}" Click="ImportCommonParts_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextBlackBrush}" BorderThickness="0" Height="40" Margin="0,10,0,0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+        </StackPanel>
+
+        <!-- Right Side: Search & Grid -->
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Search Bar -->
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="SearchBox" Height="40" FontSize="16" VerticalContentAlignment="Center" TextChanged="Filter_Changed" Tag="{DynamicResource Str_SearchModelPlaceholder}"/>
+                <TextBlock IsHitTestVisible="False" Text="{DynamicResource Str_SearchModelPlaceholder}" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="White">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value="">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+
+            <!-- Results Grid -->
+            <DataGrid x:Name="ModelsGrid" Grid.Row="1" MouseDoubleClick="ModelsGrid_MouseDoubleClick" AutoGenerateColumns="False">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Delete" Click="DeleteModel_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{DynamicResource Str_ModelNumber}" Binding="{Binding ModelNumber}" Width="150"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Category}" Binding="{Binding Category}" Width="100"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Type}" Binding="{Binding Type}" Width="100"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Value}" Binding="{Binding Value}" Width="80"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Description}" Binding="{Binding Description}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="35" Margin="0,0,10,0" Click="Cancel_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button Content="{DynamicResource Str_Add}" Width="80" Height="35" Click="AddSelected_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Margin="0,0,15,0">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="{DynamicResource StandardButtonCornerRadius}"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <TextBlock Text="{DynamicResource Str_Qty}" VerticalAlignment="Center" Foreground="White" Margin="0,0,5,0"/>
+            <TextBox x:Name="QuantityBox" Width="50" Height="35" Text="1" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</Window>

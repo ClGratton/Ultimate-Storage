@@ -3,9 +3,9 @@ using System.Diagnostics;
 
 namespace StorageHandler.Scripts {
     public class ColorEditor {
-        private readonly StorageLoader _storageLoader;
+        private StorageLoader _storageLoader;
         private readonly StorageBoxManager _boxManager;
-        private readonly StorageContainer? _rootContainer;
+        private StorageContainer? _rootContainer;
 
         public ColorEditor(StorageLoader storageLoader, StorageBoxManager boxManager, StorageContainer? rootContainer) {
             _storageLoader = storageLoader;
@@ -16,6 +16,14 @@ namespace StorageHandler.Scripts {
             if (_rootContainer == null) {
                 Debug.WriteLine("ColorEditor: _rootContainer is null during initialization.");
             }
+        }
+
+        public void UpdateLoader(StorageLoader loader) {
+            _storageLoader = loader;
+        }
+
+        public void UpdateContainer(StorageContainer? container) {
+            _rootContainer = container;
         }
 
         public void EditColor(string boxName, string newColor) {

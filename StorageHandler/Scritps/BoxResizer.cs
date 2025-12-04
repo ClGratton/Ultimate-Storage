@@ -13,15 +13,8 @@ using System.Windows.Media;
 
 namespace StorageHandler.Scripts {
     public class BoxResizer {
-        private static readonly bool DebugInit = false;
         private static readonly bool DebugHandles = true;
         private static readonly bool DebugResize = true;
-        private static readonly bool DebugResizeVerbose = false;
-        private static readonly bool DebugPositioning = true;
-        private static readonly bool DebugEvents = false;
-        private static readonly bool DebugErrors = false;
-        private static readonly bool DebugErrors1 = true;
-        private static readonly bool DebugSerialization = false;
 
         private readonly Dictionary<string, string> _lastDebugBlocks = new();
 
@@ -34,9 +27,9 @@ namespace StorageHandler.Scripts {
 
         private readonly StorageLoader _storageLoader;
         private readonly StorageContainer _rootContainer;
-        private Border _currentBox;
-        private StorageContainer _currentContainer;
-        private Border _resizeHandle;
+        private Border? _currentBox;
+        private StorageContainer? _currentContainer;
+        private Border? _resizeHandle;
         private Point _startDragPoint;
         private bool _isDragging;
         private int _originalGridWidth;
@@ -51,10 +44,12 @@ namespace StorageHandler.Scripts {
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = true };
 
-        public BoxResizer(StorageLoader storageLoader, StorageContainer rootContainer) {
+        private readonly Action? _refreshUi;
+
+        public BoxResizer(StorageLoader storageLoader, StorageContainer rootContainer, Action? refreshUi = null) {
             _storageLoader = storageLoader;
             _rootContainer = rootContainer;
-            if (DebugInit) Debug.WriteLine("BoxResizer: Initialized");
+            _refreshUi = refreshUi;
         }
 
         public void AttachResizeHandle(Border box, StorageContainer container) {
@@ -80,7 +75,6 @@ namespace StorageHandler.Scripts {
             Canvas.SetZIndex(handle, 100);
 
             if (box.Parent is not Canvas canvas) {
-                if (DebugErrors) Debug.WriteLine("BoxResizer: ERROR - Box parent is not a Canvas");
                 return;
             }
 
@@ -110,7 +104,6 @@ namespace StorageHandler.Scripts {
         }
 
         private void HandleResizeStart(object sender, MouseButtonEventArgs e, Border box, StorageContainer container, Border handle) {
-            if (DebugEvents) Debug.WriteLine("BoxResizer: Handle MouseDown event triggered");
             _isDragging = true;
             if (box.Parent is not Canvas canvas) return;
 
@@ -175,29 +168,45 @@ namespace StorageHandler.Scripts {
             int finalGridX = (int)Math.Round(Canvas.GetLeft(_currentBox) / CanvasScaleFactor);
             int finalGridY = (int)Math.Round(Canvas.GetTop(_currentBox) / CanvasScaleFactor);
 
-            bool hasSizeChanged = finalGridWidth != _originalGridWidth || finalGridHeight != _originalGridHeight;
-            bool hasPositionChanged = _originalChildPositions.TryGetValue(_currentContainer.Name, out var originalPos) &&
-                                      (finalGridX != originalPos[0] || finalGridY != originalPos[1]);
-
             if (finalGridX < 0 || finalGridY < 0 || finalGridWidth < MinGridSize || finalGridHeight < MinGridSize) {
                 RevertCurrentBoxToOriginalState();
                 _originalChildPositions.Clear();
                 return;
             }
 
+            // Ensure _rootContainer reflects the state corresponding to finalGridWidth/Height.
+            // The last drag event might have failed (reverting memory to original), but the UI shows the last valid size.
+            // We need to re-apply the moves for the final size before saving.
+            if (!IsValidResize(_currentContainer, finalGridWidth, finalGridHeight, false, false, null)) {
+                RevertCurrentBoxToOriginalState();
+                _originalChildPositions.Clear();
+                _currentBox = null;
+                _currentContainer = null;
+                _resizeHandle = null;
+                return;
+            }
+
+            bool hasSizeChanged = finalGridWidth != _originalGridWidth || finalGridHeight != _originalGridHeight;
+            bool hasPositionChanged = _originalChildPositions.TryGetValue(_currentContainer.Name, out var originalPos) &&
+                                      (finalGridX != originalPos[0] || finalGridY != originalPos[1]);
+
             if (hasSizeChanged || hasPositionChanged) {
                 try {
-                    var containerInRoot = _rootContainer.Children.FirstOrDefault(c => c.Name == _currentContainer.Name);
-                    if (containerInRoot != null) {
-                        containerInRoot.Size = new[] { finalGridWidth, finalGridHeight };
-                        containerInRoot.Position = new[] { finalGridX, finalGridY };
+                    if (_rootContainer != null) {
+                        var containerInRoot = _rootContainer.Children.FirstOrDefault(c => c.Name == _currentContainer.Name);
+                        if (containerInRoot != null) {
+                            containerInRoot.Size = new[] { finalGridWidth, finalGridHeight };
+                            containerInRoot.Position = new[] { finalGridX, finalGridY };
+                        }
+
+                        var clonedRootForSave = JsonSerializer.Deserialize<StorageContainer>(
+                            JsonSerializer.Serialize(_rootContainer, JsonSerializerOptions), JsonSerializerOptions);
+
+                        if (clonedRootForSave != null) {
+                            _storageLoader.SaveTemporary(clonedRootForSave);
+                        }
+                        _refreshUi?.Invoke();
                     }
-
-                    var clonedRootForSave = JsonSerializer.Deserialize<StorageContainer>(
-                        JsonSerializer.Serialize(_rootContainer, JsonSerializerOptions), JsonSerializerOptions);
-
-                    _storageLoader.SaveTemporary(clonedRootForSave);
-                    UpdateAllHandles();
                 } catch {
                     RevertCurrentBoxToOriginalState();
                 }
@@ -223,13 +232,7 @@ namespace StorageHandler.Scripts {
             _currentContainer.Size[0] = _originalGridWidth;
             _currentContainer.Size[1] = _originalGridHeight;
 
-            UpdateSpecificBoxUI(_currentBox,
-                originalPos[0] * CanvasScaleFactor,
-                originalPos[1] * CanvasScaleFactor,
-                _originalGridWidth * CanvasScaleFactor,
-                _originalGridHeight * CanvasScaleFactor);
-            UpdateResizeHandlePosition(_resizeHandle, _currentBox);
-            UpdateAllHandles();
+            _refreshUi?.Invoke();
         }
 
         /// <summary>
@@ -264,24 +267,35 @@ namespace StorageHandler.Scripts {
             }
 
             // Check for overlaps
-            foreach (var box1 in _rootContainer.Children)
-                foreach (var box2 in _rootContainer.Children.Where(b => b.Name != box1.Name))
+            bool overlapDetected = false;
+            foreach (var box1 in _rootContainer.Children) {
+                foreach (var box2 in _rootContainer.Children.Where(b => b.Name != box1.Name)) {
                     if (box1.Position[0] < box2.Position[0] + box2.Size[0] &&
                         box1.Position[0] + box1.Size[0] > box2.Position[0] &&
                         box1.Position[1] < box2.Position[1] + box2.Size[1] &&
                         box1.Position[1] + box1.Size[1] > box2.Position[1]) {
-                        // Restore original positions
-                        foreach (var child in _rootContainer.Children)
-                            if (originalPositionsSnapshot.TryGetValue(child.Name, out var origPos)) {
-                                child.Position[0] = origPos[0];
-                                child.Position[1] = origPos[1];
-                            }
-                        if (rootVersionOfActiveContainer != null) {
-                            rootVersionOfActiveContainer.Size[0] = _originalGridWidth;
-                            rootVersionOfActiveContainer.Size[1] = _originalGridHeight;
-                        }
-                        return false;
+                        
+                        overlapDetected = true;
+                        if (debugSb != null) debugSb.AppendLine($"Overlap detected between {box1.Name} and {box2.Name}");
+                        break;
                     }
+                }
+                if (overlapDetected) break;
+            }
+
+            if (overlapDetected) {
+                // Restore original positions
+                foreach (var child in _rootContainer.Children)
+                    if (originalPositionsSnapshot.TryGetValue(child.Name, out var origPos)) {
+                        child.Position[0] = origPos[0];
+                        child.Position[1] = origPos[1];
+                    }
+                if (rootVersionOfActiveContainer != null) {
+                    rootVersionOfActiveContainer.Size[0] = _originalGridWidth;
+                    rootVersionOfActiveContainer.Size[1] = _originalGridHeight;
+                }
+                return false;
+            }
 
             UpdateBoxPositions();
             return true;
@@ -312,57 +326,87 @@ namespace StorageHandler.Scripts {
     int mainProspectiveNewGridY, int mainNewGridHeight,
     StringBuilder? debugSb = null) {
             int widthChange = mainNewGridWidth - mainOriginalGridWidth;
-            int activeContainerOldRightEdge = mainOriginalGridX + mainOriginalGridWidth;
             int activeContainerNewRightEdge = mainProspectiveNewGridX + mainNewGridWidth;
 
-            // Only select boxes that are to the right of the active container's old right edge
-            // and have vertical overlap with the active container's new height
-            var allBoxesToRight = _rootContainer.Children
-                .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
-                .Where(b => _originalChildPositions[b.Name][0] >= activeContainerOldRightEdge)
-                .Where(b => _originalChildPositions[b.Name][1] < mainProspectiveNewGridY + mainNewGridHeight &&
-                            _originalChildPositions[b.Name][1] + b.Size[1] > mainProspectiveNewGridY)
-                .OrderBy(b => _originalChildPositions[b.Name][0])
-                .ToList();
-
-            if (!allBoxesToRight.Any()) return true;
-
             if (widthChange > 0) {
-                int pushDistance = activeContainerNewRightEdge - activeContainerOldRightEdge;
-
-                // Modified logic: Only push boxes that would actually collide with the resized box
-                var boxesToPush = allBoxesToRight
-                    .Where(b => _originalChildPositions[b.Name][0] < activeContainerNewRightEdge)
+                // Select boxes that overlap with the NEW bounds of the active container
+                // We only care about boxes to the right (since we resize from bottom-right)
+                // So we look for boxes whose original Left is < New Right Edge
+                // AND whose original Left is >= Original Left (to avoid pushing boxes to the left of us)
+                var boxesToPush = _rootContainer.Children
+                    .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
+                    .Where(b => _originalChildPositions[b.Name][0] < activeContainerNewRightEdge &&
+                                _originalChildPositions[b.Name][0] >= mainOriginalGridX) // Ensure we don't grab boxes to our left
+                    .Where(b => b.Position[1] < mainProspectiveNewGridY + mainNewGridHeight &&
+                                b.Position[1] + b.Size[1] > mainProspectiveNewGridY)
+                    .OrderBy(b => _originalChildPositions[b.Name][0])
                     .ToList();
 
-                if (boxesToPush.Any()) {
-                    // Check if pushing these boxes would exceed grid limits
-                    foreach (var boxToPush in boxesToPush) {
-                        int newBoxX = _originalChildPositions[boxToPush.Name][0] + pushDistance;
-                        if (newBoxX + boxToPush.Size[0] > MaxGridCoordinate) return false;
+                // Also include boxes that are to the right of the new edge but might be pushed by the chain
+                // So we actually need a broader search for the chain reaction.
+                // Let's grab EVERYTHING to the right of the original active container.
+                var allBoxesToRight = _rootContainer.Children
+                    .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
+                    .Where(b => _originalChildPositions[b.Name][0] >= mainOriginalGridX + mainOriginalGridWidth) // Strictly to the right of original
+                    .Where(b => b.Position[1] < mainProspectiveNewGridY + mainNewGridHeight &&
+                                b.Position[1] + b.Size[1] > mainProspectiveNewGridY)
+                    .OrderBy(b => _originalChildPositions[b.Name][0])
+                    .ToList();
+                
+                // Merge the lists (boxes we directly overlap + boxes that might be pushed)
+                var chainList = boxesToPush.Union(allBoxesToRight).OrderBy(b => _originalChildPositions[b.Name][0]).ToList();
+
+                if (!chainList.Any()) return true;
+
+                foreach (var box in chainList) {
+                    int requiredX = -1;
+
+                    // 1. Check if pushed by active container
+                    // If this box was originally overlapping or touching the new bounds, it must be at least at NewRightEdge
+                    if (_originalChildPositions[box.Name][0] < activeContainerNewRightEdge) {
+                        requiredX = activeContainerNewRightEdge;
                     }
 
-                    // Push only the boxes that would collide
-                    foreach (var boxToPush in boxesToPush)
-                        boxToPush.Position[0] = _originalChildPositions[boxToPush.Name][0] + pushDistance;
+                    // 2. Check if pushed by other boxes in the chain
+                    foreach (var leftBox in chainList.Where(b => b != box)) {
+                        // If leftBox is to the left (or at same X but processed earlier)
+                        // AND overlaps vertically
+                        if (_originalChildPositions[leftBox.Name][0] <= _originalChildPositions[box.Name][0] &&
+                            DoBoxesOverlapVertically(leftBox, box)) {
+                            
+                            int leftBoxNewRight = leftBox.Position[0] + leftBox.Size[0];
+                            if (leftBoxNewRight > requiredX) {
+                                requiredX = leftBoxNewRight;
+                            }
+                        }
+                    }
 
-                    if (debugSb != null)
-                        debugSb.AppendLine($"Pushed {boxesToPush.Count} boxes to right by {pushDistance} units");
-                } else if (debugSb != null) {
-                    debugSb.AppendLine("No boxes needed to be pushed (enough space between boxes)");
+                    // Apply push if needed
+                    if (requiredX != -1 && box.Position[0] < requiredX) {
+                        box.Position[0] = requiredX;
+                    }
+
+                    if (box.Position[0] + box.Size[0] > MaxGridCoordinate) return false;
                 }
             } else if (widthChange < 0) {
-                // For each box to the right, move it left as far as possible without overlapping
-                foreach (var box in allBoxesToRight.OrderBy(b => _originalChildPositions[b.Name][0])) {
+                // Shrink logic remains similar but simpler
+                var allBoxesToRight = _rootContainer.Children
+                    .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
+                    .Where(b => _originalChildPositions[b.Name][0] >= mainOriginalGridX + mainOriginalGridWidth)
+                    .Where(b => b.Position[1] < mainProspectiveNewGridY + mainNewGridHeight &&
+                                b.Position[1] + b.Size[1] > mainProspectiveNewGridY)
+                    .OrderBy(b => _originalChildPositions[b.Name][0])
+                    .ToList();
+
+                foreach (var box in allBoxesToRight) {
                     int minX = activeContainerNewRightEdge;
-                    // Find the rightmost edge of any box to the left of this one (including the resized box)
                     foreach (var other in _rootContainer.Children.Where(b => b != box && b.Depth == activeContainer.Depth)) {
-                        int otherRight = other.Position[0] + other.Size[0];
-                        if (otherRight <= _originalChildPositions[box.Name][0] && // only consider boxes to the left
+                        // Only consider boxes to the left of 'box'
+                        if (other.Position[0] + other.Size[0] <= _originalChildPositions[box.Name][0] &&
                             other.Position[1] < box.Position[1] + box.Size[1] &&
-                            other.Position[1] + other.Size[1] > box.Position[1]) // vertical overlap
+                            other.Position[1] + other.Size[1] > box.Position[1]) 
                         {
-                            minX = Math.Max(minX, otherRight);
+                            minX = Math.Max(minX, other.Position[0] + other.Size[0]);
                         }
                     }
                     box.Position[0] = minX;
@@ -371,6 +415,15 @@ namespace StorageHandler.Scripts {
             return true;
         }
 
+        private bool DoBoxesOverlapVertically(StorageContainer box1, StorageContainer box2) {
+            // Use current positions to account for any previous adjustments
+            int y1 = box1.Position[1];
+            int h1 = box1.Size[1];
+            int y2 = box2.Position[1];
+            int h2 = box2.Size[1];
+
+            return y1 < y2 + h2 && y1 + h1 > y2;
+        }
 
         private bool HandleVerticalContainerAdjustments(
             StorageContainer activeContainer,
@@ -378,65 +431,97 @@ namespace StorageHandler.Scripts {
             int mainProspectiveNewGridY, int mainNewGridHeight,
             int mainProspectiveNewGridX, int mainNewGridWidth) {
             int heightChange = mainNewGridHeight - mainOriginalGridHeight;
-            int activeContainerOldBottomEdge = mainOriginalGridY + mainOriginalGridHeight;
             int activeContainerNewBottomEdge = mainProspectiveNewGridY + mainNewGridHeight;
 
             if (heightChange > 0) {
-                int pushDistance = activeContainerNewBottomEdge - activeContainerOldBottomEdge;
+                // Select boxes that overlap with the NEW bounds of the active container
+                // We only care about boxes below (since we resize from bottom-right)
                 var boxesToPush = _rootContainer.Children
                     .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
-                    .Where(b => _originalChildPositions[b.Name][1] >= activeContainerOldBottomEdge)
-                    .Where(b => _originalChildPositions[b.Name][0] < mainProspectiveNewGridX + mainNewGridWidth &&
-                                _originalChildPositions[b.Name][0] + b.Size[0] > mainProspectiveNewGridX)
+                    .Where(b => _originalChildPositions[b.Name][1] < activeContainerNewBottomEdge &&
+                                _originalChildPositions[b.Name][1] >= mainOriginalGridY) // Ensure we don't grab boxes above us
+                    .Where(b => b.Position[0] < mainProspectiveNewGridX + mainNewGridWidth &&
+                                b.Position[0] + b.Size[0] > mainProspectiveNewGridX)
                     .OrderBy(b => _originalChildPositions[b.Name][1])
                     .ToList();
 
-                foreach (var boxToPush in boxesToPush) {
-                    int newBoxY = _originalChildPositions[boxToPush.Name][1] + pushDistance;
-                    if (newBoxY + boxToPush.Size[1] > MaxGridCoordinate) return false;
-                    bool wouldOverlap = _rootContainer.Children
-                        .Where(other => other.Name != boxToPush.Name && other.Name != activeContainer.Name && other.Depth == activeContainer.Depth)
-                        .Any(other => {
-                            int otherCurrentY = boxesToPush.Contains(other) ? _originalChildPositions[other.Name][1] + pushDistance : _originalChildPositions[other.Name][1];
-                            int otherOriginalX = _originalChildPositions[other.Name][0];
-                            return newBoxY < otherCurrentY + other.Size[1] &&
-                                   newBoxY + boxToPush.Size[1] > otherCurrentY &&
-                                   _originalChildPositions[boxToPush.Name][0] < otherOriginalX + other.Size[0] &&
-                                   _originalChildPositions[boxToPush.Name][0] + boxToPush.Size[0] > otherOriginalX;
-                        });
-                    if (wouldOverlap) return false;
-                    boxToPush.Position[1] = newBoxY;
+                // Also include boxes that are below the new edge but might be pushed by the chain
+                var allBoxesBelow = _rootContainer.Children
+                    .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
+                    .Where(b => _originalChildPositions[b.Name][1] >= mainOriginalGridY + mainOriginalGridHeight) // Strictly below original
+                    .Where(b => b.Position[0] < mainProspectiveNewGridX + mainNewGridWidth &&
+                                b.Position[0] + b.Size[0] > mainProspectiveNewGridX)
+                    .OrderBy(b => _originalChildPositions[b.Name][1])
+                    .ToList();
+
+                // Merge lists
+                var chainList = boxesToPush.Union(allBoxesBelow).OrderBy(b => _originalChildPositions[b.Name][1]).ToList();
+
+                if (!chainList.Any()) return true;
+
+                foreach (var box in chainList) {
+                    int requiredY = -1;
+
+                    // 1. Check if pushed by active container
+                    if (_originalChildPositions[box.Name][1] < activeContainerNewBottomEdge) {
+                        requiredY = activeContainerNewBottomEdge;
+                    }
+
+                    // 2. Check if pushed by other boxes in the chain
+                    foreach (var topBox in chainList.Where(b => b != box)) {
+                        // If topBox is above (or at same Y but processed earlier)
+                        // AND overlaps horizontally
+                        if (_originalChildPositions[topBox.Name][1] <= _originalChildPositions[box.Name][1] &&
+                            DoBoxesOverlapHorizontally(topBox, box)) {
+
+                            int topBoxNewBottom = topBox.Position[1] + topBox.Size[1];
+                            if (topBoxNewBottom > requiredY) {
+                                requiredY = topBoxNewBottom;
+                            }
+                        }
+                    }
+
+                    // Apply push if needed
+                    if (requiredY != -1 && box.Position[1] < requiredY) {
+                        box.Position[1] = requiredY;
+                    }
+
+                    if (box.Position[1] + box.Size[1] > MaxGridCoordinate) return false;
                 }
             } else if (heightChange < 0) {
-                var boxesToPull = _rootContainer.Children
+                var allBoxesBelow = _rootContainer.Children
                     .Where(b => b.Name != activeContainer.Name && b.Depth == activeContainer.Depth)
-                    .Where(b => _originalChildPositions[b.Name][1] >= activeContainerNewBottomEdge)
                     .Where(b => _originalChildPositions[b.Name][1] >= mainOriginalGridY + mainOriginalGridHeight)
-                    .Where(b => _originalChildPositions[b.Name][0] < mainProspectiveNewGridX + mainNewGridWidth &&
-                                _originalChildPositions[b.Name][0] + b.Size[0] > mainProspectiveNewGridX)
+                    .Where(b => b.Position[0] < mainProspectiveNewGridX + mainNewGridWidth &&
+                                b.Position[0] + b.Size[0] > mainProspectiveNewGridX)
                     .OrderBy(b => _originalChildPositions[b.Name][1])
                     .ToList();
 
-                if (boxesToPull.Any()) {
-                    var boxesByRow = boxesToPull
-                        .GroupBy(b => _originalChildPositions[b.Name][1])
-                        .OrderBy(g => g.Key);
-
-                    int previousRowNewBottomEdge = activeContainerNewBottomEdge;
-                    foreach (var rowGroup in boxesByRow) {
-                        int targetYForRow = previousRowNewBottomEdge;
-                        int shiftAmount = rowGroup.Key - targetYForRow;
-                        foreach (var boxToPull in rowGroup) {
-                            int newPulledY = _originalChildPositions[boxToPull.Name][1] - shiftAmount;
-                            if (newPulledY < 0) newPulledY = 0;
-                            boxToPull.Position[1] = newPulledY;
+                foreach (var box in allBoxesBelow) {
+                    int minY = activeContainerNewBottomEdge;
+                    foreach (var other in _rootContainer.Children.Where(b => b != box && b.Depth == activeContainer.Depth)) {
+                        // Only consider boxes above 'box'
+                        if (other.Position[1] + other.Size[1] <= _originalChildPositions[box.Name][1] &&
+                            other.Position[0] < box.Position[0] + box.Size[0] &&
+                            other.Position[0] + other.Size[0] > box.Position[0]) 
+                        {
+                            minY = Math.Max(minY, other.Position[1] + other.Size[1]);
                         }
-                        int maxPulledHeightInRow = rowGroup.Max(b => b.Size[1]);
-                        previousRowNewBottomEdge = targetYForRow + maxPulledHeightInRow;
                     }
+                    box.Position[1] = minY;
                 }
             }
             return true;
+        }
+
+        private bool DoBoxesOverlapHorizontally(StorageContainer box1, StorageContainer box2) {
+            // Use current positions to account for any previous adjustments
+            int x1 = box1.Position[0];
+            int w1 = box1.Size[0];
+            int x2 = box2.Position[0];
+            int w2 = box2.Size[0];
+
+            return x1 < x2 + w2 && x1 + w1 > x2;
         }
 
         private void UpdateBoxPositions() {
@@ -476,7 +561,8 @@ namespace StorageHandler.Scripts {
 
             foreach (var uiBox in allUiBoxes) {
                 if (uiBox.DataContext is StorageContainer containerData &&
-                    _handleMap.TryGetValue(containerData.Name, out Border handle)) {
+                    _handleMap.TryGetValue(containerData.Name, out var handle)) {
+                    if (handle == null) continue;
                     UpdateResizeHandlePosition(handle, uiBox);
 
                     if (uiBox.Background is SolidColorBrush boxBrush) {
@@ -492,9 +578,9 @@ namespace StorageHandler.Scripts {
             }
         }
 
-        private Canvas GetRelevantCanvas() {
+        private Canvas? GetRelevantCanvas() {
             if (_currentBox?.Parent is Canvas canvas) return canvas;
-            if (_rootContainer.Children.Any() && _handleMap.Any()) {
+            if (_rootContainer != null && _rootContainer.Children.Any() && _handleMap.Any()) {
                 var firstHandleVisual = _handleMap.Values.FirstOrDefault();
                 if (firstHandleVisual?.Parent is Canvas handleCanvas) return handleCanvas;
             }
@@ -510,9 +596,8 @@ namespace StorageHandler.Scripts {
             targetContainer.Size[0] = Math.Max(MinGridSize, Math.Min(newGridWidth, MaxGridCoordinate - targetContainer.Position[0]));
             targetContainer.Size[1] = Math.Max(MinGridSize, Math.Min(newGridHeight, MaxGridCoordinate - targetContainer.Position[1]));
 
-            UpdateBoxPositions();
-            UpdateAllHandles();
             _storageLoader.SaveTemporary(_rootContainer);
+            _refreshUi?.Invoke();
         }
 
         public void ClearHandles(Canvas canvas) {

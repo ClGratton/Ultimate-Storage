@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C#: StorageHandler Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/StorageHandler/bin/Debug/net8.0-windows/StorageHandler.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/StorageHandler",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

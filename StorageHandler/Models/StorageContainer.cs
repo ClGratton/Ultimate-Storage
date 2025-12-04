@@ -26,6 +26,12 @@ namespace StorageHandler.Models {
 
         [JsonPropertyName("children")]
         public List<StorageContainer> Children { get; set; } = new List<StorageContainer>();
+
+        [JsonPropertyName("isItemContainer")]
+        public bool IsItemContainer { get; set; } = false;
+
+        [JsonIgnore]
+        public List<StorageItem> Items { get; set; } = new List<StorageItem>();
     }
 }
 

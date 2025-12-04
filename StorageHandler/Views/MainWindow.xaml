@@ -1,9 +1,10 @@
-﻿<Window x:Class="StorageHandler.Views.MainWindow"
+<Window x:Class="StorageHandler.Views.MainWindow"
        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:StorageHandler"
+       xmlns:converters="clr-namespace:StorageHandler.Converters"
        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
        mc:Ignorable="d"
        Title="MainWindow"
@@ -12,13 +13,139 @@
        AllowsTransparency="True"
        Background="Transparent">
 
+    <Window.Resources>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        
+        <Style x:Key="MenuButtonTheme" TargetType="RadioButton">
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="{DynamicResource CategoryButtonCornerRadius}"
+                                Padding="15,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="Collapsed" x:Name="ActionButtons">
+                                    <!-- Settings Button -->
+                                    <Button x:Name="SettingsButton" 
+                                            Width="24" Height="24" 
+                                            Margin="0,0,5,0"
+                                            Background="{DynamicResource SelectionBrush}"
+                                            BorderThickness="0"
+                                            Tag="{TemplateBinding Tag}"
+                                            Click="CategorySettings_Click">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="{DynamicResource CategoryButtonCornerRadius}"/>
+                                            </Style>
+                                        </Button.Resources>
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource CategoryButtonCornerRadius}">
+                                                    <TextBlock Text="⚙" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                        <Setter Property="Opacity" Value="0.9"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+
+                                    <!-- Delete Button -->
+                                    <Button x:Name="DeleteButton" 
+                                            Width="24" Height="24" 
+                                            Background="{DynamicResource SelectionBrush2}"
+                                            BorderThickness="0"
+                                            Tag="{TemplateBinding Tag}"
+                                            Click="CategoryDelete_Click">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="{DynamicResource CategoryButtonCornerRadius}"/>
+                                            </Style>
+                                        </Button.Resources>
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="DeleteBorder" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource CategoryButtonCornerRadius}">
+                                                    <TextBlock Text="🗑" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                        <Setter TargetName="DeleteBorder" Property="Background" Value="{DynamicResource SelectionBrush3}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource SelectionBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter TargetName="ActionButtons" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style x:Key="TextboxTheme" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{DynamicResource ControlBackgroundBrush}" CornerRadius="{DynamicResource SearchBoxCornerRadius}" Padding="10,5">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                                <TextBlock Text="{TemplateBinding Tag}" 
+                                           Foreground="{DynamicResource TextSecondaryBrush}" 
+                                           IsHitTestVisible="False"
+                                           VerticalAlignment="Center"
+                                           Visibility="Collapsed"
+                                           x:Name="Placeholder"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </Window.Resources>
+
     <!-- Enable resize support via WindowChrome -->
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="8"/>
     </shell:WindowChrome.WindowChrome>
 
     <Grid MouseLeftButtonDown="DragWindow">
-        <Border Background="#212529" CornerRadius="20"/>
+        <Border Background="{DynamicResource WindowBackgroundBrush}" CornerRadius="{DynamicResource WindowCornerRadius}"/>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
@@ -26,56 +153,318 @@
 
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="110" />
+                <RowDefinition Height="40" />
+                <RowDefinition Height="70" />
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <Image Source="/Assets/Images/Logo.png" 
+            <Image Grid.Row="0" Grid.RowSpan="2" Source="/Assets/Images/Logo.png" 
                   Width="310" 
                   Height="380" 
                   VerticalAlignment="Center" 
                   HorizontalAlignment="Center"/>
 
-            <StackPanel Grid.Row="1">
-                <RadioButton Content="Electronics"
-                             Height="50"
+            <StackPanel Grid.Row="2" x:Name="CategoryStackPanel" Margin="10,0">
+                <RadioButton Content="{DynamicResource Str_Electronics}"
+                             Height="{DynamicResource BaseControlHeight}"
                              GroupName="StorageType"
                              Foreground="White"
                              FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}" />
+                             Style="{StaticResource MenuButtonTheme}"
+                             Tag="electronics"
+                             IsChecked="True"
+                             Checked="Category_Checked"/>
 
-                <RadioButton Content="Yu-Gi-Oh"
-                             Height="50"
+                <RadioButton Content="{DynamicResource Str_Yugioh}"
+                             Height="{DynamicResource BaseControlHeight}"
                              GroupName="StorageType"
                              Foreground="White"
                              FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}" />
+                             Style="{StaticResource MenuButtonTheme}"
+                             Tag="yugioh"
+                             Checked="Category_Checked"/>
 
-                <RadioButton Content="Filament"
-                             Height="50"
+                <RadioButton Content="{DynamicResource Str_Filament}"
+                             Height="{DynamicResource BaseControlHeight}"
                              GroupName="StorageType"
                              Foreground="White"
                              FontSize="14"
-                             Style="{StaticResource MenuButtonTheme}" />
+                             Style="{StaticResource MenuButtonTheme}"
+                             Tag="filament"
+                             Checked="Category_Checked"/>
+
+                <Button Height="{DynamicResource BaseControlHeight}"
+                        Foreground="White"
+                        FontSize="14"
+                        Click="NewCategory_Click"
+                        Margin="0,10,0,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Border"
+                                    Background="Transparent" 
+                                    BorderThickness="0"
+                                    CornerRadius="{DynamicResource CategoryButtonCornerRadius}"
+                                    Padding="15,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="+" FontWeight="Bold" Margin="0,0,10,0"/>
+                                    <TextBlock Text="New Category"/> 
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter TargetName="Border" Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/> 
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
             </StackPanel>
 
-            <TextBox Grid.Column="1" 
-                     Grid.Row="0"                   
-                     VerticalContentAlignment="Center"
-                     
-                     Margin="20,40,20,40" 
-                     Style="{StaticResource TextboxTheme}" Tag="Search through the whole storage..." />
+            <!-- Top Bar Buttons Removed -->
+
+            <Button x:Name="CloseButton"
+                    Grid.Row="0" Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,5,20,0"
+                    Width="30" Height="30"
+                    Click="CloseApp_Click"
+                    Background="{DynamicResource SelectionBrush}"
+                    BorderThickness="0"
+                    Foreground="{DynamicResource TextPrimaryBrush}"
+                    Panel.ZIndex="100"
+                    ToolTip="Close Application">
+                <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Margin="0,0,1,1"/>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                            <Setter TargetName="Border" Property="Background" Value="#C42B1C"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+            </Button>
+
+            <Grid Grid.Column="1" Grid.Row="1" Margin="20,10,20,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button x:Name="BackButton"
+                        Grid.Column="0"
+                        Click="BackButton_Click"
+                        Visibility="Collapsed"
+                        Width="60"
+                        Height="30"
+                        Margin="0,0,10,0"
+                        Background="{DynamicResource SelectionBrush}"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        BorderThickness="0">
+                    <TextBlock Text="↩" FontSize="20" FontWeight="Bold" Margin="0,-2,0,0"/>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="#6C757D"/>
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Opacity" Value="0.9"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <TextBox Grid.Column="1" 
+                         Height="30"
+                         VerticalContentAlignment="Center"
+                         Style="{StaticResource TextboxTheme}" 
+                         Tag="{DynamicResource Str_SearchPlaceholder}" />
+            </Grid>
+
             <!-- Storage Grid -->
             <Canvas x:Name="StorageGrid" 
                     Grid.Column="1" 
-                    Grid.Row="1" 
+                    Grid.Row="2" 
                     Background="Transparent" 
                     Margin="40,10,0,0"
                     MouseRightButtonUp="StorageGrid_MouseRightButtonUp">
                 
                 <!-- Storage boxes will be dynamically added here -->
             </Canvas>
+
+            <!-- Items Grid -->
+            <DataGrid x:Name="ItemsGrid"
+                      Grid.Column="1"
+                      Grid.Row="2"
+                      Margin="40,10,40,10"
+                      AutoGenerateColumns="False"
+                      Visibility="Collapsed"
+                      Background="{DynamicResource ItemListBackgroundBrush}"
+                      BorderThickness="0"
+                      HeadersVisibility="Column"
+                      CanUserAddRows="False"
+                      CellEditEnding="ItemsGrid_CellEditEnding">
+                <DataGrid.Resources>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,2"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource ControlAltBackgroundBrush}"/>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <!-- Component Column (Read Only) -->
+                    <DataGridTextColumn Header="{DynamicResource Str_Component}" 
+                                        Binding="{Binding Category}"
+                                        Width="150"
+                                        IsReadOnly="True"/>
+
+                    <!-- Model Number Column (Read Only) -->
+                    <DataGridTextColumn Header="{DynamicResource Str_ModelNumber}"
+                                        Binding="{Binding ModelNumber}"
+                                        Width="150"
+                                        IsReadOnly="True"/>
+
+                    <!-- Datasheet Link Column -->
+                    <DataGridTemplateColumn Header="{DynamicResource Str_Datasheet}" Width="80" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="📄" 
+                                        ToolTip="{Binding DatasheetLink}"
+                                        Click="OpenDatasheet_Click"
+                                        Visibility="{Binding DatasheetLink, Converter={StaticResource StringToVisibilityConverter}}"
+                                        Background="Transparent" 
+                                        BorderThickness="0"
+                                        Foreground="{DynamicResource PrimaryBrush}"
+                                        FontSize="16"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="{DynamicResource Str_Type}" Binding="{Binding Type}" Width="120" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Value}" Binding="{Binding Value}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="{DynamicResource Str_Qty}" Binding="{Binding Quantity}" Width="60" />
+                    <DataGridTextColumn Header="{DynamicResource Str_Description}" Binding="{Binding Description}" Width="2*" IsReadOnly="True"/>
+                </DataGrid.Columns>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="{DynamicResource Str_AddItem}" Click="AddItem_Click"/>
+                        <Separator/>
+                        <MenuItem Header="{DynamicResource Str_DeleteItem}" Click="DeleteItem_Click"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
+
+            <!-- Floating Action Buttons -->
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" Panel.ZIndex="100">
+                <Button x:Name="RevertButton"
+                        Click="RevertChanges_Click"
+                        Width="60"
+                        Height="30"
+                        Margin="0,0,10,0"
+                        Background="{DynamicResource SelectionBrush2}"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        BorderThickness="0"
+                        ToolTip="Revert Changes">
+                    <TextBlock Text="Undo" FontSize="14" FontWeight="Bold"/>
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="{DynamicResource BackButtonCornerRadius}"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource SelectionBrush3}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="Border" Property="Background" Value="#6C757D"/>
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button x:Name="SaveButton"
+                        Click="SaveChanges_Click"
+                        Width="60"
+                        Height="30"
+                        Background="{DynamicResource SelectionBrush}"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        BorderThickness="0"
+                        ToolTip="Save Changes">
+                    <TextBlock Text="💾" FontSize="16"/>
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="{DynamicResource BackButtonCornerRadius}"/>
+                        </Style>
+                    </Button.Resources>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="#6C757D"/>
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Opacity" Value="0.9"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
             
         </Grid>
     </Grid>
