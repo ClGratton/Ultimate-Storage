@@ -30,7 +30,7 @@
         </Style>
     </Window.Resources>
 
-    <Border Background="#212529" BorderBrush="#495057" BorderThickness="1" CornerRadius="8">
+    <Border Background="#212529" BorderBrush="#495057" BorderThickness="1" CornerRadius="{DynamicResource SearchBoxCornerRadius}">
         <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -42,14 +42,14 @@
 
             <StackPanel Grid.Row="1" VerticalAlignment="Center">
                 <TextBlock x:Name="PromptText" Text="Please enter a value:" Foreground="#ADB5BD" Margin="0,0,0,5"/>
-                <TextBox x:Name="InputTextBox" Height="35" FontSize="14" VerticalContentAlignment="Center" KeyDown="InputTextBox_KeyDown"/>
+                <TextBox x:Name="InputTextBox" Height="{DynamicResource StandardControlHeight}" FontSize="14" VerticalContentAlignment="Center" KeyDown="InputTextBox_KeyDown"/>
             </StackPanel>
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="35" Margin="0,0,10,0" Click="Cancel_Click" Background="#6C757D" Foreground="White" BorderThickness="0">
+                <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="{DynamicResource StandardControlHeight}" Margin="0,0,10,0" Click="Cancel_Click" Background="#6C757D" Foreground="White" BorderThickness="0">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource SmallCornerRadius}">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -61,10 +61,10 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-                <Button Content="{DynamicResource Str_OK}" Width="80" Height="35" Click="OK_Click" Background="{DynamicResource SelectionBrush}" Foreground="White" BorderThickness="0">
+                <Button Content="{DynamicResource Str_OK}" Width="80" Height="{DynamicResource StandardControlHeight}" Click="OK_Click" Background="{DynamicResource SelectionBrush}" Foreground="White" BorderThickness="0">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource SmallCornerRadius}">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>

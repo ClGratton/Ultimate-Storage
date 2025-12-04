@@ -34,28 +34,28 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="NewCategoryBox" Height="30" VerticalContentAlignment="Center" Padding="5" Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0"/>
-                <Button Content="{DynamicResource Str_Add}" Width="60" Height="30" Margin="10,0,0,0" Click="Add_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+                <TextBox x:Name="NewCategoryBox" Height="{DynamicResource SmallControlHeight}" VerticalContentAlignment="Center" Padding="5" Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0"/>
+                <Button Content="{DynamicResource Str_Add}" Width="60" Height="{DynamicResource SmallControlHeight}" Margin="10,0,0,0" Click="Add_Click" Background="{DynamicResource SelectionBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                     <Button.Resources>
                         <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="5"/>
+                            <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                         </Style>
                     </Button.Resources>
                 </Button>
             </Grid>
 
-            <Button Content="{DynamicResource Str_DeleteSelected}" Height="30" Click="Delete_Click" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Margin="0,0,0,10">
+            <Button Content="{DynamicResource Str_DeleteSelected}" Height="{DynamicResource SmallControlHeight}" Click="Delete_Click" Background="{DynamicResource DangerBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0" Margin="0,0,0,10">
                 <Button.Resources>
                     <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                     </Style>
                 </Button.Resources>
             </Button>
 
-            <Button Content="{DynamicResource Str_Close}" Height="30" Click="Close_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Close}" Height="{DynamicResource SmallControlHeight}" Click="Close_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                     </Style>
                 </Button.Resources>
             </Button>

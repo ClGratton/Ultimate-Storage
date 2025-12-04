@@ -36,7 +36,7 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Visibility="Collapsed" x:Name="ActionButtons">
                                     <!-- Settings Button -->
                                     <Button x:Name="SettingsButton" 
-                                            Width="24" Height="24" 
+                                            Width="{DynamicResource IconSize}" Height="{DynamicResource IconSize}" 
                                             Margin="0,0,5,0"
                                             Background="{DynamicResource SelectionBrush}"
                                             BorderThickness="0"
@@ -64,7 +64,7 @@
 
                                     <!-- Delete Button -->
                                     <Button x:Name="DeleteButton" 
-                                            Width="24" Height="24" 
+                                            Width="{DynamicResource IconSize}" Height="{DynamicResource IconSize}" 
                                             Background="{DynamicResource SelectionBrush2}"
                                             BorderThickness="0"
                                             Tag="{TemplateBinding Tag}"
@@ -201,7 +201,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Margin="0,5,20,0"
-                    Width="30" Height="30"
+                    Width="{DynamicResource SmallControlHeight}" Height="{DynamicResource SmallControlHeight}"
                     Click="CloseApp_Click"
                     Background="{DynamicResource SelectionBrush}"
                     BorderThickness="0"
@@ -242,7 +242,7 @@
                         Click="BackButton_Click"
                         Visibility="Collapsed"
                         Width="60"
-                        Height="30"
+                        Height="{DynamicResource SmallControlHeight}"
                         Margin="0,0,10,0"
                         Background="{DynamicResource SelectionBrush}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
@@ -274,7 +274,7 @@
                 </Button>
 
                 <TextBox Grid.Column="1" 
-                         Height="30"
+                         Height="{DynamicResource SmallControlHeight}"
                          VerticalContentAlignment="Center"
                          Style="{StaticResource TextboxTheme}" 
                          Tag="{DynamicResource Str_SearchPlaceholder}" />
@@ -318,7 +318,7 @@
                 <Button x:Name="RevertButton"
                         Click="RevertChanges_Click"
                         Width="60"
-                        Height="30"
+                        Height="{DynamicResource SmallControlHeight}"
                         Margin="0,0,10,0"
                         Background="{DynamicResource SelectionBrush2}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
@@ -358,7 +358,7 @@
                 <Button x:Name="SaveButton"
                         Click="SaveChanges_Click"
                         Width="60"
-                        Height="30"
+                        Height="{DynamicResource SmallControlHeight}"
                         Background="{DynamicResource SelectionBrush}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
                         BorderThickness="0"

@@ -4,7 +4,14 @@
 
     <!-- Dimensions -->
     <system:Double x:Key="BaseControlHeight">50</system:Double>
+    <system:Double x:Key="LargeControlHeight">40</system:Double>
+    <system:Double x:Key="StandardControlHeight">35</system:Double>
+    <system:Double x:Key="SmallControlHeight">30</system:Double>
+    <system:Double x:Key="IconSize">24</system:Double>
+    <system:Double x:Key="SmallIconSize">16</system:Double>
+    
     <CornerRadius x:Key="BaseCornerRadius">10</CornerRadius>
+    <CornerRadius x:Key="SmallCornerRadius">5</CornerRadius>
     
     <!-- Calculated Radiuses (approximate based on 0.2 ratio of height) -->
     <!-- Category Button: Height 50, Radius 10 -->

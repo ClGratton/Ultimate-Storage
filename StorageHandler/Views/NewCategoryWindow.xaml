@@ -16,7 +16,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="{DynamicResource SmallCornerRadius}" Padding="{TemplateBinding Padding}">
                             <ScrollViewer x:Name="PART_ContentHost"/>
                         </Border>
                     </ControlTemplate>
@@ -39,7 +39,7 @@
         <!-- Category Name -->
         <StackPanel Grid.Row="1" Margin="0,0,0,15">
             <TextBlock Text="{DynamicResource Str_EnterCategoryName}" Foreground="White" Margin="0,0,0,5"/>
-            <TextBox x:Name="CategoryNameBox" Height="35" VerticalContentAlignment="Center" Padding="5"/>
+            <TextBox x:Name="CategoryNameBox" Height="{DynamicResource StandardControlHeight}" VerticalContentAlignment="Center" Padding="5"/>
         </StackPanel>
 
         <!-- Items Database File -->
@@ -50,11 +50,11 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBox x:Name="ItemsFileBox" Height="35" VerticalContentAlignment="Center" Padding="5" TextChanged="ItemsFileBox_TextChanged"/>
-                <Button Content="..." Grid.Column="1" Width="35" Height="35" Margin="5,0,0,0" Click="Browse_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+                <TextBox x:Name="ItemsFileBox" Height="{DynamicResource StandardControlHeight}" VerticalContentAlignment="Center" Padding="5" TextChanged="ItemsFileBox_TextChanged"/>
+                <Button Content="..." Grid.Column="1" Width="{DynamicResource StandardControlHeight}" Height="{DynamicResource StandardControlHeight}" Margin="5,0,0,0" Click="Browse_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                     <Button.Resources>
                         <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="5"/>
+                            <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                         </Style>
                     </Button.Resources>
                 </Button>
@@ -69,11 +69,11 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox x:Name="IdColumnCombo" Height="35" VerticalContentAlignment="Center" Padding="5"/>
-                <Button Content="No Field / Generate" Grid.Column="1" Width="120" Height="35" Margin="5,0,0,0" Click="GenerateIds_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+                <ComboBox x:Name="IdColumnCombo" Height="{DynamicResource StandardControlHeight}" VerticalContentAlignment="Center" Padding="5"/>
+                <Button Content="No Field / Generate" Grid.Column="1" Width="120" Height="{DynamicResource StandardControlHeight}" Margin="5,0,0,0" Click="GenerateIds_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                     <Button.Resources>
                         <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="5"/>
+                            <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                         </Style>
                     </Button.Resources>
                 </Button>
@@ -82,17 +82,17 @@
 
         <!-- Buttons -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="30" Margin="0,0,10,0" Click="Cancel_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Cancel}" Width="80" Height="{DynamicResource SmallControlHeight}" Margin="0,0,10,0" Click="Cancel_Click" Background="{DynamicResource SecondaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                     </Style>
                 </Button.Resources>
             </Button>
-            <Button Content="{DynamicResource Str_Create}" Width="80" Height="30" Click="Create_Click" Background="{DynamicResource PrimaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
+            <Button Content="{DynamicResource Str_Create}" Width="80" Height="{DynamicResource SmallControlHeight}" Click="Create_Click" Background="{DynamicResource PrimaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderThickness="0">
                 <Button.Resources>
                     <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="5"/>
+                        <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}"/>
                     </Style>
                 </Button.Resources>
             </Button>
