@@ -493,6 +493,8 @@ namespace StorageHandler.Views {
         }
 
         private void StorageGrid_MouseRightButtonUp(object sender, MouseButtonEventArgs e) {
+            if (_rootContainer == null) return;
+
             Debug.WriteLine("Right click detected on StorageGrid");
             var point = e.GetPosition(StorageGrid);
 
