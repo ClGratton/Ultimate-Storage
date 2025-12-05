@@ -37,5 +37,6 @@ namespace StorageHandler.Config {
 
         // Data Handling
         public const int MaxItemsToScanForColumns = 9999;  // Max items to scan to decide what columns to show
+        public const int MaxIdGenerationLimit = 99999;
     }
 }

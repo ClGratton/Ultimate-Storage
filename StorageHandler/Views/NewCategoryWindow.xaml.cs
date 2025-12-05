@@ -76,16 +76,20 @@ namespace StorageHandler.Views {
                 var items = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
 
                 if (items != null) {
+                    // Safety check: Prevent modifying existing 'id' columns
+                    if (items.Any(i => i.ContainsKey("id"))) {
+                        MessageBox.Show("Column 'id' already exists in the database. Please select it as the Unique ID column, or rename it in your database file if you wish to generate new IDs.", "ID Column Exists", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
                     int counter = 0;
                     foreach (var item in items) {
-                        if (!item.ContainsKey("id")) {
-                            if (counter > 99999) {
-                                MessageBox.Show("ID Limit Reached (99999). Stopping generation.", "Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
-                                break;
-                            }
-                            item["id"] = $"{counter:D5}";
-                            counter++;
+                        if (counter > AppConfig.MaxIdGenerationLimit) {
+                            MessageBox.Show($"ID Limit Reached ({AppConfig.MaxIdGenerationLimit}). Stopping generation.", "Limit Reached", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            break;
                         }
+                        item["id"] = $"{counter:D5}";
+                        counter++;
                     }
 
                     var newJson = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
