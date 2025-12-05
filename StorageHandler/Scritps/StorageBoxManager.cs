@@ -1,4 +1,5 @@
 using StorageHandler.Models;
+using StorageHandler.Config;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Linq;
@@ -48,12 +49,12 @@ namespace StorageHandler.Scripts {
 
         public void AddStorageBox(StorageContainer container) {
             var box = new Border {
-                Width = container.Size[0] * 100,
-                Height = container.Size[1] * 100,
+                Width = container.Size[0] * AppConfig.CanvasScaleFactor,
+                Height = container.Size[1] * AppConfig.CanvasScaleFactor,
                 Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(container.Color)),
                 BorderBrush = Brushes.Black,
-                BorderThickness = new System.Windows.Thickness(1),
-                CornerRadius = new System.Windows.CornerRadius(10),
+                BorderThickness = new System.Windows.Thickness(AppConfig.BoxBorderThickness),
+                CornerRadius = new System.Windows.CornerRadius(AppConfig.BoxCornerRadius),
                 DataContext = container
             };
 
@@ -71,7 +72,7 @@ namespace StorageHandler.Scripts {
                 Text = container.Name,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(8, 0, 8, 0),
+                Margin = new Thickness(AppConfig.BoxTextMargin, 0, AppConfig.BoxTextMargin, 0),
                 TextAlignment = TextAlignment.Center,
                 Visibility = Visibility.Collapsed
             };
@@ -81,8 +82,8 @@ namespace StorageHandler.Scripts {
             grid.Children.Add(nameEditor);
             box.Child = grid;
 
-            Canvas.SetLeft(box, container.Position[0] * 100);
-            Canvas.SetTop(box, container.Position[1] * 100);
+            Canvas.SetLeft(box, container.Position[0] * AppConfig.CanvasScaleFactor);
+            Canvas.SetTop(box, container.Position[1] * AppConfig.CanvasScaleFactor);
 
             _boxDrag?.AttachDragHandlers(box, container);
 

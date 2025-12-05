@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using StorageHandler.Models;
 using StorageHandler.Scripts;
+using StorageHandler.Config;
 
 namespace StorageHandler.Views {
     public partial class ItemSelectionWindow : Window {
@@ -86,9 +87,9 @@ namespace StorageHandler.Views {
 
                 // Special width for Description
                 if (key == "Description") column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
-                if (key == "Id") column.Width = 120;
-                if (key == "Value") column.Width = 80;
-                if (key == "Package") column.Width = 80;
+                if (key == "Id") column.Width = AppConfig.ColWidth_Id;
+                if (key == "Value") column.Width = AppConfig.ColWidth_ValueSmall;
+                if (key == "Package") column.Width = AppConfig.ColWidth_Package;
                 
                 if (key.Equals(defaultSortHeader, StringComparison.OrdinalIgnoreCase)) {
                     column.SortDirection = ListSortDirection.Ascending;

@@ -1,4 +1,5 @@
 ﻿using StorageHandler.Models;
+using StorageHandler.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,9 +28,9 @@ namespace StorageHandler.Scripts {
         private readonly Dictionary<string, int[]> _originalChildPositions = new();
         private Border? _currentHandle;
 
-        public const int MaxGridCoordinate = 10;
+        public const int MaxGridCoordinate = AppConfig.MaxGridCoordinate;
 
-        private const double DragPixelThreshold = 2.0; // ignore sub-pixel jitters
+        private const double DragPixelThreshold = AppConfig.DragPixelThreshold; // ignore sub-pixel jitters
         private static readonly JsonSerializerOptions JsonOptionsIndented = new() { WriteIndented = true };
 
         private string GetStr(string key) {

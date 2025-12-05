@@ -1,4 +1,5 @@
 ﻿using StorageHandler.Models;
+using StorageHandler.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,10 +38,10 @@ namespace StorageHandler.Scripts {
         private Dictionary<string, int[]> _originalChildPositions = new();
         private Dictionary<string, Border> _handleMap = new();
 
-        private const double HandleVisualSize = 16;
-        public const double CanvasScaleFactor = 100;
-        private const int MinGridSize = 1;
-        private const int MaxGridCoordinate = 10;
+        private const double HandleVisualSize = AppConfig.HandleVisualSize;
+        public const double CanvasScaleFactor = AppConfig.CanvasScaleFactor;
+        private const int MinGridSize = AppConfig.MinGridSize;
+        private const int MaxGridCoordinate = AppConfig.MaxGridCoordinate;
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = true };
 

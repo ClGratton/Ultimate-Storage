@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using StorageHandler.Models;
 using StorageHandler.Scripts;
+using StorageHandler.Config;
 
 
 namespace StorageHandler.Views {
@@ -472,7 +473,7 @@ namespace StorageHandler.Views {
                 // Debug print to see Y coordinate
                 Debug.WriteLine($"Mouse clicked at Y = {mousePosition.Y}");
 
-                if (mousePosition.Y <= 38) {
+                if (mousePosition.Y <= AppConfig.WindowCaptionHeight) {
                     if (WindowState == WindowState.Maximized) {
 
                         Point cursorPosition = PointToScreen(mousePosition);
@@ -510,8 +511,8 @@ namespace StorageHandler.Views {
             }
 
             // Otherwise, check if we can add a box at the clicked position
-            int gridX = (int)(point.X / BoxResizer.CanvasScaleFactor);
-            int gridY = (int)(point.Y / BoxResizer.CanvasScaleFactor);
+            int gridX = (int)(point.X / AppConfig.CanvasScaleFactor);
+            int gridY = (int)(point.Y / AppConfig.CanvasScaleFactor);
 
             // Get the correct collection to check against based on current depth
             IEnumerable<StorageContainer> containersToCheck;
@@ -1088,7 +1089,7 @@ namespace StorageHandler.Views {
                     // Special template column for Datasheet
                     var templateColumn = new DataGridTemplateColumn {
                         Header = GetStr("Str_Datasheet"),
-                        Width = 80,
+                        Width = AppConfig.ColWidth_Datasheet,
                         IsReadOnly = true,
                         SortMemberPath = $"CustomData[{key}]" // Enable sorting for template column
                     };
@@ -1126,12 +1127,12 @@ namespace StorageHandler.Views {
 
                 // Special widths
                 if (key.Equals("Description", StringComparison.OrdinalIgnoreCase)) column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
-                if (key.Equals("Quantity", StringComparison.OrdinalIgnoreCase)) column.Width = 60;
-                if (key.Equals("Value", StringComparison.OrdinalIgnoreCase)) column.Width = 100;
-                if (key.Equals("Type", StringComparison.OrdinalIgnoreCase)) column.Width = 120;
-                if (key.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) column.Width = 150;
-                if (key.Equals("Category", StringComparison.OrdinalIgnoreCase)) column.Width = 150;
-                if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) column.Width = 120;
+                if (key.Equals("Quantity", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Quantity;
+                if (key.Equals("Value", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Value;
+                if (key.Equals("Type", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Type;
+                if (key.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_ModelNumber;
+                if (key.Equals("Category", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Category;
+                if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Id;
 
                 // Default Sort for ID
                 if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) {
@@ -1280,6 +1281,9 @@ namespace StorageHandler.Views {
                     SaveChanges_Click(sender, e);
                     Application.Current.Shutdown();
                 } else if (result == MessageBoxResult.No) {
+                    // User explicitly said NO to saving changes
+                    // We must discard the temporary file
+                    _storageLoader.RevertChanges();
                     Application.Current.Shutdown();
                 }
                 // If Cancel, do nothing
