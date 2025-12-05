@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using StorageHandler.Models;
 using StorageHandler.Scripts;
 using StorageHandler.Config;
+using System.Windows.Interop;
 
 
 namespace StorageHandler.Views {
@@ -39,6 +40,9 @@ namespace StorageHandler.Views {
 
         public MainWindow() {
             InitializeComponent();
+
+            // Restore Window State
+            RestoreWindowState();
 
             _boxManager = new StorageBoxManager(StorageGrid);
             _boxManager.Box_MouseDoubleClick += Box_MouseDoubleClick;
@@ -1306,10 +1310,70 @@ namespace StorageHandler.Views {
             if (WindowState == WindowState.Maximized) {
                 MaximizeIcon.Text = "❐";
                 MaximizeButton.ToolTip = GetStr("Str_Restore");
+                
+                ConfigManager.Current.IsMaximized = true;
+                ConfigManager.Save();
             } else {
                 MaximizeIcon.Text = "☐";
                 MaximizeButton.ToolTip = GetStr("Str_Maximize");
+                
+                if (WindowState == WindowState.Normal) {
+                    ConfigManager.Current.IsMaximized = false;
+                    ConfigManager.Save();
+                }
             }
+        }
+
+        private void RestoreWindowState() {
+            var config = ConfigManager.Current;
+
+            // Restore size if valid
+            if (config.WindowWidth > 0 && config.WindowHeight > 0) {
+                Width = config.WindowWidth;
+                Height = config.WindowHeight;
+            }
+
+            // Restore position if valid
+            if (config.WindowLeft != -1 && config.WindowTop != -1) {
+                // Ensure the window is visible on some screen
+                // Simple check: if Top/Left are way off, ignore
+                if (config.WindowLeft >= SystemParameters.VirtualScreenLeft - Width &&
+                    config.WindowLeft <= SystemParameters.VirtualScreenLeft + SystemParameters.VirtualScreenWidth &&
+                    config.WindowTop >= SystemParameters.VirtualScreenTop - Height &&
+                    config.WindowTop <= SystemParameters.VirtualScreenTop + SystemParameters.VirtualScreenHeight) {
+                    
+                    Left = config.WindowLeft;
+                    Top = config.WindowTop;
+                }
+            }
+
+            // Restore maximized state
+            if (config.IsMaximized) {
+                WindowState = WindowState.Maximized;
+            }
+        }
+
+        protected override void OnSourceInitialized(EventArgs e) {
+            base.OnSourceInitialized(e);
+            HwndSource source = (HwndSource)PresentationSource.FromVisual(this);
+            source.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
+            const int WM_EXITSIZEMOVE = 0x0232;
+
+            if (msg == WM_EXITSIZEMOVE) {
+                if (WindowState == WindowState.Normal) {
+                    ConfigManager.Current.WindowWidth = Width;
+                    ConfigManager.Current.WindowHeight = Height;
+                    ConfigManager.Current.WindowLeft = Left;
+                    ConfigManager.Current.WindowTop = Top;
+                    ConfigManager.Save();
+                    Debug.WriteLine($"Window state saved: {Width}x{Height} at {Left},{Top}");
+                }
+            }
+
+            return IntPtr.Zero;
         }
 
     }

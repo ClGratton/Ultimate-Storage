@@ -17,14 +17,14 @@
     <!-- Category Button: Height 50, Radius 10 -->
     <CornerRadius x:Key="CategoryButtonCornerRadius">10</CornerRadius>
     
-    <!-- Search Box: Height ~40, Radius 8 -->
-    <CornerRadius x:Key="SearchBoxCornerRadius">8</CornerRadius>
+    <!-- Search Box: Height ~40, Radius 10 (Matched to Window Radius 20 - Margin 10) -->
+    <CornerRadius x:Key="SearchBoxCornerRadius">10</CornerRadius>
     
-    <!-- Back Button: Height 30, Radius 6 -->
-    <CornerRadius x:Key="BackButtonCornerRadius">6</CornerRadius>
+    <!-- Back Button: Height 30, Radius 10 (Matched to Window Radius 20 - Margin 10) -->
+    <CornerRadius x:Key="BackButtonCornerRadius">10</CornerRadius>
     
-    <!-- Standard Button: Height 35-40, Radius 7-8 -->
-    <CornerRadius x:Key="StandardButtonCornerRadius">7</CornerRadius>
+    <!-- Standard Button: Height 35-40, Radius 10 -->
+    <CornerRadius x:Key="StandardButtonCornerRadius">10</CornerRadius>
     
     <!-- Window Radius -->
     <CornerRadius x:Key="WindowCornerRadius">20</CornerRadius>

@@ -1,8 +1,10 @@
+// Only STATIC configuration constants should go here.
+
 namespace StorageHandler.Config {
     public static class AppConfig {
         //Windows Constants
-        public const int DefaultWindowWidth = 920;
-        public const int DefaultWindowHeight = 600;
+        public const double DefaultWindowWidth = 920;
+        public const double DefaultWindowHeight = 600;
         
     
         // Grid & Canvas Constants
@@ -31,9 +33,6 @@ namespace StorageHandler.Config {
         public const double ColWidth_ModelNumber = 150.0;
         public const double ColWidth_Category = 150.0;
         public const double ColWidth_Datasheet = 80.0;
-        
-        // Animation
-        public const double DefaultAnimationDuration = 0.2;
 
         // Data Handling
         public const int MaxItemsToScanForColumns = 9999;  // Max items to scan to decide what columns to show
