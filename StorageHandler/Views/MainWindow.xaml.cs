@@ -273,6 +273,9 @@ namespace StorageHandler.Views {
         }
 
         private void LoadStorageCategory(string category) {
+            // Clear column cache to prevent stale columns from previous category
+            ColumnHelper.ClearCache();
+
             string filename = $"storage_{category}.json";
 
             string jsonPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, filename);
@@ -348,6 +351,10 @@ namespace StorageHandler.Views {
 
             AvailableComponents.Clear();
             AvailableModels.Clear();
+            
+            // Invalidate column cache since models are changing
+            ColumnHelper.InvalidateCache("Catalog");
+            ColumnHelper.InvalidateCache("ItemSelection");
 
             var components = _storageLoader.LoadComponents();
             foreach (var comp in components) AvailableComponents.Add(comp);
