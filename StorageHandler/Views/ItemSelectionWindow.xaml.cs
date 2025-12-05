@@ -59,7 +59,11 @@ namespace StorageHandler.Views {
                 if (key == "Category") {
                     column.Binding = new Binding(key);
                 } else {
-                    column.Binding = new Binding($"CustomData[{key}]");
+                    // Use DictionaryValueConverter to safely access CustomData
+                    column.Binding = new Binding("CustomData") {
+                        Converter = (IValueConverter)FindResource("DictionaryValueConverter"),
+                        ConverterParameter = key
+                    };
                 }
 
                 if (key == "Description") column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
@@ -75,8 +79,15 @@ namespace StorageHandler.Views {
             }
 
             _modelsView.SortDescriptions.Clear();
+            // Note: Sorting by CustomData[key] directly might still cause issues if keys are missing in some items.
+            // However, ICollectionView sorting usually handles nulls gracefully compared to Binding.
+            // If sorting crashes, we might need a custom IComparer.
             string sortProperty = defaultSortHeader == "Category" ? "Category" : $"CustomData[{defaultSortHeader}]";
             _modelsView.SortDescriptions.Add(new SortDescription(sortProperty, ListSortDirection.Ascending));
+            
+            // Enable Virtualization for performance
+            ModelsGrid.EnableRowVirtualization = true;
+            ModelsGrid.EnableColumnVirtualization = true;
         }
 
         private bool FilterModels(object item) {

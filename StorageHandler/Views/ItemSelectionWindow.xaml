@@ -4,12 +4,15 @@
         xmlns:p="clr-namespace:StorageHandler.Properties"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:scripts="clr-namespace:StorageHandler.Scripts"
         mc:Ignorable="d"
         Title="Select Component" Height="750" Width="900"
         WindowStartupLocation="CenterOwner"
         Background="#212529">
     
     <Window.Resources>
+        <scripts:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
+        
         <Style TargetType="TextBox">
             <Setter Property="Background" Value="#343A40"/>
             <Setter Property="Foreground" Value="White"/>
@@ -99,7 +102,11 @@
             </Grid>
 
             <!-- Results Grid -->
-            <DataGrid x:Name="ModelsGrid" Grid.Row="1" MouseDoubleClick="ModelsGrid_MouseDoubleClick" AutoGenerateColumns="False">
+            <DataGrid x:Name="ModelsGrid" Grid.Row="1" MouseDoubleClick="ModelsGrid_MouseDoubleClick" AutoGenerateColumns="False"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Delete" Click="DeleteModel_Click"/>

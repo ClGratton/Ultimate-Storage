@@ -5,6 +5,7 @@ namespace StorageHandler.Config {
         //Windows Constants
         public const double DefaultWindowWidth = 920;
         public const double DefaultWindowHeight = 600;
+        public const string DefaultStoragePath = "Database\\Storage";
         
     
         // Grid & Canvas Constants

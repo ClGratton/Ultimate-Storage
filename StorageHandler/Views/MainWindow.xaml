@@ -19,6 +19,7 @@
     <Window.Resources>
         <scripts:UrlToVisibilityConverter x:Key="UrlToVisibilityConverter"/>
         <scripts:NotUrlToVisibilityConverter x:Key="NotUrlToVisibilityConverter"/>
+        <scripts:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
         
         <Style x:Key="MenuButtonTheme" TargetType="RadioButton">
             <Setter Property="Margin" Value="0,0,0,5"/>
@@ -394,6 +395,10 @@
                       BorderThickness="0"
                       HeadersVisibility="Column"
                       CanUserAddRows="False"
+                      EnableRowVirtualization="True"
+                      EnableColumnVirtualization="True"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
                       CellEditEnding="ItemsGrid_CellEditEnding">
                 <!-- Columns are generated dynamically in code -->
                 <DataGrid.ContextMenu>

@@ -22,9 +22,13 @@ namespace StorageHandler.Views {
         }
 
         private void Browse_Click(object sender, RoutedEventArgs e) {
+            string storageDir = ConfigManager.StorageDirectory;
+            string dbRoot = Path.GetDirectoryName(storageDir) ?? string.Empty;
+            string componentsDir = Path.Combine(dbRoot, "Components");
+
             var dialog = new OpenFileDialog {
                 Filter = "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
-                InitialDirectory = Path.Combine(AppContext.BaseDirectory, "Database", "Components")
+                InitialDirectory = componentsDir
             };
 
             if (dialog.ShowDialog() == true) {
@@ -133,7 +137,9 @@ namespace StorageHandler.Views {
 
             // Copy file to Database/Components if it's not already there
             string fileName = Path.GetFileName(path);
-            string destDir = Path.Combine(AppContext.BaseDirectory, "Database", "Components");
+            string storageDir = ConfigManager.StorageDirectory;
+            string dbRoot = Path.GetDirectoryName(storageDir) ?? string.Empty;
+            string destDir = Path.Combine(dbRoot, "Components");
             string destPath = Path.Combine(destDir, fileName);
 
             if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);

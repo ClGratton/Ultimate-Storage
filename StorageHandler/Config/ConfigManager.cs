@@ -10,6 +10,21 @@ namespace StorageHandler.Config {
         
         public static UserConfig Current { get; private set; } = new UserConfig();
 
+        public static string StorageDirectory {
+            get {
+                var path = Current.StorageFolderPath;
+                if (string.IsNullOrWhiteSpace(path)) {
+                    path = AppConfig.DefaultStoragePath;
+                }
+                
+                if (Path.IsPathRooted(path)) {
+                    return path;
+                } else {
+                    return Path.Combine(AppContext.BaseDirectory, path);
+                }
+            }
+        }
+
         public static void Load() {
             if (File.Exists(ConfigPath)) {
                 try {

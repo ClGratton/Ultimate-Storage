@@ -10,8 +10,8 @@ namespace StorageHandler.Config {
         [JsonPropertyName("theme")]
         public string Theme { get; set; } = "Dark";
 
-        [JsonPropertyName("appDataPath")]
-        public string AppDataPath { get; set; } = ""; // Placeholder for now
+        [JsonPropertyName("storageFolderPath")]
+        public string StorageFolderPath { get; set; } = AppConfig.DefaultStoragePath;
 
         // Window State
         [JsonPropertyName("windowWidth")]

@@ -14,8 +14,11 @@ namespace StorageHandler {
             ConfigManager.Load();
 
             // Generate Test Data
-            string dbRoot = Path.Combine(AppContext.BaseDirectory, "Database");
-            ApiEmulator.GenerateTestFiles(dbRoot);
+            string storageDir = ConfigManager.StorageDirectory;
+            string? dbRoot = Path.GetDirectoryName(storageDir);
+            if (!string.IsNullOrEmpty(dbRoot)) {
+                ApiEmulator.GenerateTestFiles(dbRoot);
+            }
 
             // Apply Language
             ApplyLanguage(ConfigManager.Current.Language);

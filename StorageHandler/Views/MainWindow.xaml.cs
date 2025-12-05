@@ -48,8 +48,8 @@ namespace StorageHandler.Views {
             _boxManager.Box_MouseDoubleClick += Box_MouseDoubleClick;
             
             // Migration: Rename storage1.json to storage_electronics.json if it exists and the new one doesn't
-            string oldDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage1.json");
-            string newDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage_electronics.json");
+            string oldDefaultPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, "storage1.json");
+            string newDefaultPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, "storage_electronics.json");
             
             if (File.Exists(oldDefaultPath) && !File.Exists(newDefaultPath)) {
                 try {
@@ -103,8 +103,8 @@ namespace StorageHandler.Views {
             try {
                 // 1. Determine filename
                 string filename = $"storage_{category}.json";
-                string fullPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
-                string tempPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename.Replace(".json", ".temp.json"));
+                string fullPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, filename);
+                string tempPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, filename.Replace(".json", ".temp.json"));
 
                 // 2. Delete files
                 if (File.Exists(fullPath)) File.Delete(fullPath);
@@ -190,7 +190,7 @@ namespace StorageHandler.Views {
                 }
 
                 string filename = $"storage_{safeName.ToLower()}.json";
-                string fullPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
+                string fullPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, filename);
 
                 if (File.Exists(fullPath)) {
                     MessageBox.Show(GetStr("Str_CategoryExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
@@ -238,7 +238,7 @@ namespace StorageHandler.Views {
         }
 
         private void LoadCustomCategories() {
-            string storageDir = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage");
+            string storageDir = ConfigManager.StorageDirectory;
             if (!Directory.Exists(storageDir)) return;
 
             var files = Directory.GetFiles(storageDir, "storage_*.json");
@@ -275,7 +275,7 @@ namespace StorageHandler.Views {
         private void LoadStorageCategory(string category) {
             string filename = $"storage_{category}.json";
 
-            string jsonPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", filename);
+            string jsonPath = System.IO.Path.Combine(ConfigManager.StorageDirectory, filename);
             Debug.WriteLine($"MainWindow: Switching category to {category}, path: {jsonPath}");
 
             if (_storageLoader != null) {
@@ -356,7 +356,9 @@ namespace StorageHandler.Views {
             if (!string.IsNullOrEmpty(categoryName)) {
                 var def = components.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
                 if (def != null && !string.IsNullOrEmpty(def.DatabaseFile)) {
-                    string catalogPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Components", def.DatabaseFile);
+                    string storageDir = ConfigManager.StorageDirectory;
+                    string dbRoot = System.IO.Path.GetDirectoryName(storageDir) ?? string.Empty;
+                    string catalogPath = System.IO.Path.Combine(dbRoot, "Components", def.DatabaseFile);
                     
                     // Fallback: Check if it's a full path or relative
                     if (!File.Exists(catalogPath) && File.Exists(def.DatabaseFile)) {
@@ -1072,25 +1074,46 @@ namespace StorageHandler.Views {
 
                 // 1. TextBlock for non-link text
                 var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
-                textBlockFactory.SetValue(TextBlock.TextProperty, new Binding($"CustomData[{key}]"));
+                // Use DictionaryValueConverter to safely access CustomData
+                var textBinding = new Binding("CustomData") {
+                    Converter = (IValueConverter)FindResource("DictionaryValueConverter"),
+                    ConverterParameter = key
+                };
+                textBlockFactory.SetValue(TextBlock.TextProperty, textBinding);
                 textBlockFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
-                textBlockFactory.SetValue(TextBlock.VisibilityProperty, new Binding($"CustomData[{key}]") { 
-                    Converter = (IValueConverter)FindResource("NotUrlToVisibilityConverter"),
-                    FallbackValue = Visibility.Visible,
-                    TargetNullValue = Visibility.Visible
+                
+                // Bind Visibility to the Text property (which already has the safe value)
+                textBlockFactory.SetBinding(TextBlock.VisibilityProperty, new Binding("Text") {
+                    RelativeSource = RelativeSource.Self,
+                    Converter = (IValueConverter)FindResource("NotUrlToVisibilityConverter")
                 });
+                
                 gridFactory.AppendChild(textBlockFactory);
 
                 // 2. Button for links (Paperclip icon)
                 var buttonFactory = new FrameworkElementFactory(typeof(Button));
-                buttonFactory.SetValue(Button.ContentProperty, "📎"); // Paperclip icon
-                buttonFactory.SetValue(Button.ToolTipProperty, new Binding($"CustomData[{key}]"));
-                buttonFactory.SetValue(Button.TagProperty, new Binding($"CustomData[{key}]"));
-                buttonFactory.SetValue(Button.VisibilityProperty, new Binding($"CustomData[{key}]") { 
-                    Converter = (IValueConverter)FindResource("UrlToVisibilityConverter"),
-                    FallbackValue = Visibility.Collapsed,
-                    TargetNullValue = Visibility.Collapsed
+                buttonFactory.SetValue(Button.ContentProperty, "📎"); 
+                
+                // ToolTip and Tag can use the safe text binding
+                // We create new bindings to avoid sharing instances, though sharing is often fine
+                var toolTipBinding = new Binding("CustomData") {
+                    Converter = (IValueConverter)FindResource("DictionaryValueConverter"),
+                    ConverterParameter = key
+                };
+                buttonFactory.SetValue(Button.ToolTipProperty, toolTipBinding);
+                
+                var tagBinding = new Binding("CustomData") {
+                    Converter = (IValueConverter)FindResource("DictionaryValueConverter"),
+                    ConverterParameter = key
+                };
+                buttonFactory.SetValue(Button.TagProperty, tagBinding);
+
+                // Visibility: Bind to ToolTip (which has the text) and convert
+                buttonFactory.SetBinding(Button.VisibilityProperty, new Binding("ToolTip") {
+                    RelativeSource = RelativeSource.Self,
+                    Converter = (IValueConverter)FindResource("UrlToVisibilityConverter")
                 });
+                
                 buttonFactory.SetValue(Button.BackgroundProperty, Brushes.Transparent);
                 buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
                 buttonFactory.SetValue(Button.ForegroundProperty, FindResource("PrimaryBrush"));
@@ -1141,6 +1164,10 @@ namespace StorageHandler.Views {
             // Apply initial sort
             ItemsGrid.Items.SortDescriptions.Clear();
             ItemsGrid.Items.SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Ascending));
+            
+            // Performance: Enable virtualization
+            ItemsGrid.EnableRowVirtualization = true;
+            ItemsGrid.EnableColumnVirtualization = true;
         }
 
         private void AddItem_Click(object sender, RoutedEventArgs e) {
