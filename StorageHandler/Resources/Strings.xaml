@@ -68,7 +68,7 @@
     <system:String x:Key="Str_MergeError">Error merging items: {0}</system:String>
     <system:String x:Key="Str_Box">Box</system:String>
     <system:String x:Key="Str_ItemList">Item List</system:String>
-    <system:String x:Key="Str_Cancel">Cancel</system:String>
+    <system:String x:Key="Str_Cancel">Done</system:String>
     <system:String x:Key="Str_OK">OK</system:String>
     <system:String x:Key="Str_SelectComponent">Select Component</system:String>
     <system:String x:Key="Str_Filters">Filters</system:String>

@@ -19,6 +19,9 @@ namespace StorageHandler.Views {
         public List<ComponentModel> SelectedModels { get; private set; } = new List<ComponentModel>();
         public int SelectedQuantity { get; private set; } = 1;
 
+        // Event to notify when items are added without closing the window
+        public event Action<List<ComponentModel>, int>? OnItemsAdded;
+
         private string GetStr(string key) {
             return Application.Current.TryFindResource(key) as string ?? key;
         }
@@ -205,8 +208,14 @@ namespace StorageHandler.Views {
                     SelectedModel = SelectedModels[0];
                 }
 
-                DialogResult = true;
-                Close();
+                // Trigger event to add items
+                OnItemsAdded?.Invoke(new List<ComponentModel>(SelectedModels), SelectedQuantity);
+
+                // Clear selection to allow adding more
+                ModelsGrid.SelectedItems.Clear();
+                
+                // Optional: Provide feedback?
+                // For now, clearing the selection is the visual cue.
             } else {
                 MessageBox.Show(GetStr("Str_SelectModelMsg"), GetStr("Str_SelectionRequired"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }

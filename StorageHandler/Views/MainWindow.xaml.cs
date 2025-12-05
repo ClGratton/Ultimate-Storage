@@ -1152,67 +1152,74 @@ namespace StorageHandler.Views {
             // Open the Item Selection Window
             var selectionWindow = new ItemSelectionWindow(AvailableModels, AvailableComponents);
             selectionWindow.Owner = this;
+            
+            // Subscribe to the event for adding items without closing
+            selectionWindow.OnItemsAdded += (models, quantity) => AddItemsToContainer(models, quantity);
 
-            if (selectionWindow.ShowDialog() == true && selectionWindow.SelectedModels.Count > 0) {
-                int quantityToAdd = selectionWindow.SelectedQuantity;
-                if (_currentActiveContainer.Items == null) _currentActiveContainer.Items = new List<StorageItem>();
+            selectionWindow.ShowDialog();
+            
+            // When window closes (via Cancel or Close button), save components in case they were modified
+            _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
+        }
 
-                // Find definition for current category once
-                var def = AvailableComponents.FirstOrDefault(c => c.Name.Equals(_currentActiveContainer.Name, StringComparison.OrdinalIgnoreCase));
-                string idCol = def?.IdColumn ?? "id";
+        private void AddItemsToContainer(List<ComponentModel> models, int quantityToAdd) {
+            if (_currentActiveContainer == null || _storageLoader == null) return;
+            
+            if (_currentActiveContainer.Items == null) _currentActiveContainer.Items = new List<StorageItem>();
 
-                foreach (var model in selectionWindow.SelectedModels) {
-                    // Determine ID
-                    string id = "";
-                    
-                    if (def != null) {
-                        // Try to find value in model
-                        if (idCol.Equals("Category", StringComparison.OrdinalIgnoreCase)) id = model.Category;
-                        else if (model.CustomData.ContainsKey(idCol)) id = model.CustomData[idCol];
-                        
-                        // Fallback if ID is still empty but we have a "id" field in custom data
-                        if (string.IsNullOrEmpty(id) && model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
-                    }
+            // Find definition for current category once
+            var def = AvailableComponents.FirstOrDefault(c => c.Name.Equals(_currentActiveContainer.Name, StringComparison.OrdinalIgnoreCase));
+            string idCol = def?.IdColumn ?? "id";
 
-                    if (string.IsNullOrEmpty(id)) {
-                         // Fallback to ModelNumber if ID not found, or any other unique field
-                         if (model.CustomData.ContainsKey("ModelNumber")) id = model.CustomData["ModelNumber"];
-                         else if (model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
-                    }
+            bool itemsAdded = false;
 
-                    // If we still don't have an ID, skip this item or generate one? 
-                    // For now, let's skip to avoid bad data
-                    if (string.IsNullOrEmpty(id)) continue;
-
-                    // Check if item already exists
-                    var existingItem = _currentActiveContainer.Items.FirstOrDefault(i => i.Id == id);
-
-                    if (existingItem != null) {
-                        // Update quantity
-                        existingItem.Quantity += quantityToAdd;
-                    } else {
-                        // Add new item
-                        var newItem = new StorageItem {
-                            Id = id,
-                            Category = model.Category,
-                            Quantity = quantityToAdd,
-                            CustomData = new Dictionary<string, string>(model.CustomData)
-                        };
-                        _currentActiveContainer.Items.Add(newItem);
-                    }
-                }
+            foreach (var model in models) {
+                // Determine ID
+                string id = "";
                 
+                if (def != null) {
+                    // Try to find value in model
+                    if (idCol.Equals("Category", StringComparison.OrdinalIgnoreCase)) id = model.Category;
+                    else if (model.CustomData.ContainsKey(idCol)) id = model.CustomData[idCol];
+                    
+                    // Fallback if ID is still empty but we have a "id" field in custom data
+                    if (string.IsNullOrEmpty(id) && model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
+                }
+
+                if (string.IsNullOrEmpty(id)) {
+                        // Fallback to ModelNumber if ID not found, or any other unique field
+                        if (model.CustomData.ContainsKey("ModelNumber")) id = model.CustomData["ModelNumber"];
+                        else if (model.CustomData.ContainsKey("id")) id = model.CustomData["id"];
+                }
+
+                // If we still don't have an ID, skip this item
+                if (string.IsNullOrEmpty(id)) continue;
+
+                // Check if item already exists
+                var existingItem = _currentActiveContainer.Items.FirstOrDefault(i => i.Id == id);
+
+                if (existingItem != null) {
+                    // Update quantity
+                    existingItem.Quantity += quantityToAdd;
+                } else {
+                    // Add new item
+                    var newItem = new StorageItem {
+                        Id = id,
+                        Category = model.Category,
+                        Quantity = quantityToAdd,
+                        CustomData = new Dictionary<string, string>(model.CustomData)
+                    };
+                    _currentActiveContainer.Items.Add(newItem);
+                }
+                itemsAdded = true;
+            }
+            
+            if (itemsAdded) {
                 _storageLoader.SaveItems(_currentActiveContainer.Name, _currentActiveContainer.Items);
                 
                 // Refresh grid
                 ItemsGrid.ItemsSource = null;
                 ItemsGrid.ItemsSource = _currentActiveContainer.Items;
-
-                // Save components in case categories were managed
-                _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
-            } else {
-                // Even if cancelled, save components in case they were modified in the management windows
-                _storageLoader.SaveComponents(new List<ComponentDefinition>(AvailableComponents));
             }
         }
 

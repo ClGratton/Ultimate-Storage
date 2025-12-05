@@ -68,7 +68,7 @@
     <system:String x:Key="Str_MergeError">Errore durante l'unione degli elementi: {0}</system:String>
     <system:String x:Key="Str_Box">Scatola</system:String>
     <system:String x:Key="Str_ItemList">Lista Oggetti</system:String>
-    <system:String x:Key="Str_Cancel">Annulla</system:String>
+    <system:String x:Key="Str_Cancel">Fine</system:String>
     <system:String x:Key="Str_OK">OK</system:String>
     <system:String x:Key="Str_SelectComponent">Seleziona Componente</system:String>
     <system:String x:Key="Str_Filters">Filtri</system:String>
