@@ -12,6 +12,9 @@
     <system:String x:Key="Str_Save">Salva Modifiche</system:String>
     <system:String x:Key="Str_Revert">Annulla Modifiche</system:String>
     <system:String x:Key="Str_CloseApp">Chiudi Applicazione</system:String>
+    <system:String x:Key="Str_Minimize">Riduci a icona</system:String>
+    <system:String x:Key="Str_Maximize">Ingrandisci</system:String>
+    <system:String x:Key="Str_Restore">Ripristina</system:String>
     <system:String x:Key="Str_Settings">Impostazioni</system:String>
     
     <!-- DataGrid Headers -->

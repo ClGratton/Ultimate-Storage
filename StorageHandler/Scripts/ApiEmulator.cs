@@ -80,14 +80,14 @@ namespace StorageHandler.Scripts {
 
             // ICs & Transistors
             var activeComponents = new List<Dictionary<string, string>> {
-                new Dictionary<string, string> { { "id", "NE555P" }, { "category", "IC" }, { "package", "DIP-8" }, { "description", "Precision Timer" } },
-                new Dictionary<string, string> { { "id", "LM358N" }, { "category", "IC" }, { "package", "DIP-8" }, { "description", "Dual Operational Amplifier" } },
-                new Dictionary<string, string> { { "id", "ATMEGA328P-PU" }, { "category", "IC" }, { "package", "DIP-28" }, { "description", "AVR Microcontroller 8-bit" } },
-                new Dictionary<string, string> { { "id", "ESP32-WROOM-32" }, { "category", "Module" }, { "package", "SMD" }, { "description", "Wi-Fi & Bluetooth Module" } },
-                new Dictionary<string, string> { { "id", "2N2222" }, { "category", "Transistor" }, { "package", "TO-92" }, { "type", "NPN" }, { "description", "NPN General Purpose Transistor" } },
+                new Dictionary<string, string> { { "id", "NE555P" }, { "category", "IC" }, { "package", "DIP-8" }, { "description", "Precision Timer" }, { "datasheet", "https://www.ti.com/lit/ds/symlink/ne555.pdf" } },
+                new Dictionary<string, string> { { "id", "LM358N" }, { "category", "IC" }, { "package", "DIP-8" }, { "description", "Dual Operational Amplifier" }, { "datasheet", "https://www.ti.com/lit/ds/symlink/lm358.pdf" } },
+                new Dictionary<string, string> { { "id", "ATMEGA328P-PU" }, { "category", "IC" }, { "package", "DIP-28" }, { "description", "AVR Microcontroller 8-bit" }, { "datasheet", "https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf" } },
+                new Dictionary<string, string> { { "id", "ESP32-WROOM-32" }, { "category", "Module" }, { "package", "SMD" }, { "description", "Wi-Fi & Bluetooth Module" }, { "datasheet", "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32_datasheet_en.pdf" } },
+                new Dictionary<string, string> { { "id", "2N2222" }, { "category", "Transistor" }, { "package", "TO-92" }, { "type", "NPN" }, { "description", "NPN General Purpose Transistor" }, { "datasheet", "https://www.onsemi.com/pdf/datasheet/p2n2222a-d.pdf" } },
                 new Dictionary<string, string> { { "id", "BC547" }, { "category", "Transistor" }, { "package", "TO-92" }, { "type", "NPN" }, { "description", "NPN General Purpose Transistor" } },
-                new Dictionary<string, string> { { "id", "IRFZ44N" }, { "category", "Transistor" }, { "package", "TO-220" }, { "type", "N-Channel MOSFET" }, { "description", "N-Channel Power MOSFET 55V 49A" } },
-                new Dictionary<string, string> { { "id", "L7805CV" }, { "category", "Regulator" }, { "package", "TO-220" }, { "output", "5V" }, { "description", "Positive Voltage Regulator 5V 1.5A" } }
+                new Dictionary<string, string> { { "id", "IRFZ44N" }, { "category", "Transistor" }, { "package", "TO-220" }, { "type", "N-Channel MOSFET" }, { "description", "N-Channel Power MOSFET 55V 49A" }, { "datasheet", "https://www.infineon.com/dgdl/Infineon-IRFZ44N-DataSheet-v01_01-EN.pdf?fileId=5546d462533600a40153563b3a9f220d" } },
+                new Dictionary<string, string> { { "id", "L7805CV" }, { "category", "Regulator" }, { "package", "TO-220" }, { "output", "5V" }, { "description", "Positive Voltage Regulator 5V 1.5A" }, { "datasheet", "https://www.st.com/resource/en/datasheet/l78.pdf" } }
             };
             electronics.AddRange(activeComponents);
 
@@ -105,7 +105,8 @@ namespace StorageHandler.Scripts {
                     { "cardName", name },
                     { "setCode", set },
                     { "rarity", rarity },
-                    { "type", type }
+                    { "type", type },
+                    { "dbLink", $"https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid={new Random().Next(4000, 15000)}" } // Fake link for testing
                 });
             }
 

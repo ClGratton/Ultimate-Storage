@@ -27,13 +27,14 @@ namespace StorageHandler.Scripts {
         private readonly Dictionary<string, int[]> _originalChildPositions = new();
         private Border? _currentHandle;
 
-        public const int MaxGridCoordinate = AppConfig.MaxGridCoordinate;
+        public const int MaxGridWidth = AppConfig.MaxGridWidth;
+        public const int MaxGridHeight = AppConfig.MaxGridHeight;
 
         private const double DragPixelThreshold = AppConfig.DragPixelThreshold; // ignore sub-pixel jitters
         private static readonly JsonSerializerOptions JsonOptionsIndented = new() { WriteIndented = true };
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public StorageBoxDrag(Canvas storageGrid, StorageLoader storageLoader, StorageContainer rootContainer, BoxResizer boxResizer, Action? refreshUi = null) {
@@ -135,8 +136,8 @@ namespace StorageHandler.Scripts {
             var newGridY = (int)Math.Round(Canvas.GetTop(_currentDragBox) / BoxResizer.CanvasScaleFactor);
 
             // Clamp within bounds considering box size
-            newGridX = Math.Max(0, Math.Min(newGridX, MaxGridCoordinate - container.Size[0]));
-            newGridY = Math.Max(0, Math.Min(newGridY, MaxGridCoordinate - container.Size[1]));
+            newGridX = Math.Max(0, Math.Min(newGridX, MaxGridWidth - container.Size[0]));
+            newGridY = Math.Max(0, Math.Min(newGridY, MaxGridHeight - container.Size[1]));
 
             var moved = _originalPosition != null && (newGridX != _originalPosition[0] || newGridY != _originalPosition[1]);
 

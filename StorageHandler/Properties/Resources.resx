@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root><accessability>internal</accessability>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+              <xsd:attribute ref="xml:space"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Str_NewCategory" xml:space="preserve" id="d037c476-346c-4c13-b0d8-8908c5523820">
+    <value>New Category</value>
+  </data>
+  <data name="Str_Back" xml:space="preserve" id="5ee31d88-5702-4490-a0ad-a55482dc223e">
+    <value>Back</value>
+  </data>
+  <data name="Str_SearchPlaceholder" xml:space="preserve" id="c3fe2510-a48b-4d0d-961b-3ed5c213156d">
+    <value>Search...</value>
+  </data>
+  <data name="Str_Undo" xml:space="preserve" id="f90c5660-2f32-4c84-8ad6-8782870ae01d">
+    <value>Undo</value>
+  </data>
+  <data name="Str_Save" xml:space="preserve" id="e2298ea2-4d07-4d1f-a821-252d5fa47f3c">
+    <value>Save Changes</value>
+  </data>
+  <data name="Str_Revert" xml:space="preserve" id="bdd8af4c-d2bd-4541-9f5e-0c9b9cfa1c87">
+    <value>Revert Changes</value>
+  </data>
+  <data name="Str_CloseApp" xml:space="preserve" id="db5ddf06-99e7-48a6-b49b-49727e69044c">
+    <value>Close Application</value>
+  </data>
+  <data name="Str_Minimize" xml:space="preserve" id="93821e72-bacd-4b34-95db-8dd6d1dd297a">
+    <value>Minimize</value>
+  </data>
+  <data name="Str_Maximize" xml:space="preserve" id="1d1375d6-f0de-42bf-b5ab-079941ea2626">
+    <value>Maximize</value>
+  </data>
+  <data name="Str_Restore" xml:space="preserve" id="3e9b8f2c-fe6b-4c7c-97c8-e865824b9455">
+    <value>Restore</value>
+  </data>
+  <data name="Str_Settings" xml:space="preserve" id="9945b8a0-4055-41ba-bebc-6d1784d78f17">
+    <value>Settings</value>
+  </data>
+  <data name="Str_Component" xml:space="preserve" id="88a114e7-d149-4f62-ae36-74f05c08bf26">
+    <value>Component</value>
+  </data>
+  <data name="Str_ModelNumber" xml:space="preserve" id="44970acd-f0b8-4f5b-8db6-56bf17af0ae7">
+    <value>Model Number</value>
+  </data>
+  <data name="Str_Datasheet" xml:space="preserve" id="8278f5c2-bbc2-4757-9a32-210b9b3ffc2d">
+    <value>Datasheet</value>
+  </data>
+  <data name="Str_Type" xml:space="preserve" id="2978f1d3-3dc6-49dd-b0f0-e105dc0bc871">
+    <value>Type</value>
+  </data>
+  <data name="Str_Value" xml:space="preserve" id="b171432c-2a9e-42b9-a229-75543d32b811">
+    <value>Value</value>
+  </data>
+  <data name="Str_Qty" xml:space="preserve" id="79bccda1-1ffa-4483-8ba9-689a4522438a">
+    <value>Qty</value>
+  </data>
+  <data name="Str_Description" xml:space="preserve" id="ccd22de7-66ad-494f-a74a-83f94144a800">
+    <value>Description</value>
+  </data>
+  <data name="Str_AddItem" xml:space="preserve" id="c11472bd-8c20-45d3-a727-5d982d6b3e2b">
+    <value>Add Item</value>
+  </data>
+  <data name="Str_DeleteItem" xml:space="preserve" id="a109f3a0-6e5f-4af0-9eeb-06f4ae9b177e">
+    <value>Delete Item</value>
+  </data>
+  <data name="Str_AddBox" xml:space="preserve" id="4d04bd90-afe3-457b-b99f-607de6aa344e">
+    <value>Add Box</value>
+  </data>
+  <data name="Str_DeleteBox" xml:space="preserve" id="971e303a-fa2c-42b8-bdeb-ca76ee554252">
+    <value>Delete Box</value>
+  </data>
+  <data name="Str_NavigateUp" xml:space="preserve" id="0b9da63c-3abd-4629-ba03-7312c0216def">
+    <value>Navigate Up a Level</value>
+  </data>
+  <data name="Str_NavigateInto" xml:space="preserve" id="77cc3405-912c-4c57-b563-4b40ca9b50fc">
+    <value>Navigate Into (or Double-Click)</value>
+  </data>
+  <data name="Str_ConvertToItemList" xml:space="preserve" id="e2f68022-9465-4670-bf48-c7fdf9c97c0d">
+    <value>Convert to Item List</value>
+  </data>
+  <data name="Str_Error" xml:space="preserve" id="4bd16fe6-e066-4edd-9554-71cfcf929919">
+    <value>Error</value>
+  </data>
+  <data name="Str_UnsavedChangesTitle" xml:space="preserve" id="0ac74c16-ad85-41c1-bff8-8655b8c57a93">
+    <value>Unsaved Changes</value>
+  </data>
+  <data name="Str_UnsavedChangesMsg" xml:space="preserve" id="fc6f3bb7-0e05-4de9-b211-ca07034f53de">
+    <value>You have unsaved changes. Do you want to save before closing?</value>
+  </data>
+  <data name="Str_ConfirmUndoTitle" xml:space="preserve" id="3c3c946a-3d55-4e41-a071-7a871a7e1856">
+    <value>Confirm Undo</value>
+  </data>
+  <data name="Str_ConfirmUndoMsg" xml:space="preserve" id="ba1efa8a-4035-45c8-8d6a-889850aa8476">
+    <value>Are you sure you want to undo all unsaved changes?</value>
+  </data>
+  <data name="Str_InvalidOp" xml:space="preserve" id="2bb84653-1354-43b2-834d-373db01834cd">
+    <value>Invalid Operation</value>
+  </data>
+  <data name="Str_BoxInItemListError" xml:space="preserve" id="83c9450f-6607-447b-a34c-2659e533f00c">
+    <value>Cannot put a box into an item list.</value>
+  </data>
+  <data name="Str_MergeTitle" xml:space="preserve" id="80e00376-8010-4e40-8a84-d7a7421b0a44">
+    <value>Merge Item Lists</value>
+  </data>
+  <data name="Str_MergeMsg" xml:space="preserve" id="3d0ac2a5-c3c6-46a2-a45a-f30d87873ca7">
+    <value>Do you want to merge the items from '{0}' into '{1}'?\n\n'{0}' will be removed.</value>
+  </data>
+  <data name="Str_MergeSuccessTitle" xml:space="preserve" id="5fa738a2-a6a4-4f57-9ee0-8d391f8e64ff">
+    <value>Merge Successful</value>
+  </data>
+  <data name="Str_MergeSuccessMsg" xml:space="preserve" id="dc99ce93-5180-4b4b-85e5-c72a3099dc20">
+    <value>Merged items into '{0}'.</value>
+  </data>
+  <data name="Str_DeleteCategory" xml:space="preserve" id="3ab774b6-2f2e-4bbc-8f2a-72695f8e98f3">
+    <value>Delete Category</value>
+  </data>
+  <data name="Str_ConfirmDeleteCategory" xml:space="preserve" id="e6651670-c986-4b4a-885c-6bd8618d8501">
+    <value>Are you sure you want to delete the category '{0}'? This will delete all data associated with it.</value>
+  </data>
+  <data name="Str_CategoryExists" xml:space="preserve" id="bdd55b38-7afc-4452-94de-ecf0a6394139">
+    <value>Category already exists!</value>
+  </data>
+  <data name="Str_EnterCategoryName" xml:space="preserve" id="d7b943bf-48d9-4f2f-9f4b-610f7d6c9c7e">
+    <value>Enter category name:</value>
+  </data>
+  <data name="Str_NewCategoryTitle" xml:space="preserve" id="8300bedd-cdbd-4304-8cfe-490ac22c31f6">
+    <value>New Category</value>
+  </data>
+  <data name="Str_BoxStructureUpdated" xml:space="preserve" id="75d7f291-aa8c-4e32-906a-9089260f8cee">
+    <value>Box Structure Updated</value>
+  </data>
+  <data name="Str_BoxChildSuccess" xml:space="preserve" id="b74827ef-11b3-4097-aaa0-314612911ab0">
+    <value>Box '{0}' is now a child of '{1}'.\n\nDouble-click on the parent box to navigate into it and see its children.</value>
+  </data>
+  <data name="Str_CircularRefError" xml:space="preserve" id="7e28c595-b5cf-43ad-ad16-02c4ebd0ed45">
+    <value>Cannot make {0} a child of {1} as it would create a circular reference.</value>
+  </data>
+  <data name="Str_MakeChildBoxTitle" xml:space="preserve" id="0cbcf0ba-1b52-4a49-905b-ab3421b6dbb5">
+    <value>Make Child Box</value>
+  </data>
+  <data name="Str_MakeChildBoxMsg" xml:space="preserve" id="2ade63bf-7e03-4525-b6a7-8c8ac9e01d18">
+    <value>Do you want to make '{0}' a child of '{1}'?</value>
+  </data>
+  <data name="Str_MakeChildBoxMsgDetails" xml:space="preserve" id="643b95b7-eb93-4ec7-8648-4c00d75047e1">
+    <value>\n\nThis will also move {0} direct child box(es) and {1} additional descendant(s).</value>
+  </data>
+  <data name="Str_SettingsNotImplemented" xml:space="preserve" id="ce27963d-8659-4e75-aca8-4f0b33f0c7fe">
+    <value>Settings for {0} are not yet implemented.</value>
+  </data>
+  <data name="Str_CannotDeleteDefault" xml:space="preserve" id="bac74686-fadc-48e8-8748-21b546dff7fd">
+    <value>Cannot delete the default 'Electronics' category.</value>
+  </data>
+  <data name="Str_SaveSuccess" xml:space="preserve" id="c1935caf-d5bf-4774-8a4e-2032779abdb6">
+    <value>Changes saved successfully.</value>
+  </data>
+  <data name="Str_LinkError" xml:space="preserve" id="b162177d-584a-4555-ae70-39c88232a96e">
+    <value>Could not open link: {0}</value>
+  </data>
+  <data name="Str_LoadError" xml:space="preserve" id="2f950170-c00c-432a-a9fb-938e230cabe7">
+    <value>Failed to load storage data.</value>
+  </data>
+  <data name="Str_NoDataToSave" xml:space="preserve" id="48259a69-3bcc-481a-afdb-db0cc6a9d3df">
+    <value>No data to save.</value>
+  </data>
+  <data name="Str_MergeError" xml:space="preserve" id="3e56893a-34bf-432b-8271-c2de5a421031">
+    <value>Error merging items: {0}</value>
+  </data>
+  <data name="Str_Box" xml:space="preserve" id="3015529a-1766-4027-893f-04630929781e">
+    <value>Box</value>
+  </data>
+  <data name="Str_ItemList" xml:space="preserve" id="a18af6a0-85f1-464f-977d-3a67d5414789">
+    <value>Item List</value>
+  </data>
+  <data name="Str_Cancel" xml:space="preserve" id="34dc53b7-32a3-4f94-9e06-a26d4a9d89e2">
+    <value>Done</value>
+  </data>
+  <data name="Str_OK" xml:space="preserve" id="1d738288-608b-421e-abb9-b433c0873ce6">
+    <value>OK</value>
+  </data>
+  <data name="Str_SelectComponent" xml:space="preserve" id="3db19279-007e-4412-8e9d-cfc8da29e746">
+    <value>Select Component</value>
+  </data>
+  <data name="Str_Filters" xml:space="preserve" id="c088bb4c-8e58-4cff-a698-fd3eb37b54e3">
+    <value>Filters</value>
+  </data>
+  <data name="Str_Category" xml:space="preserve" id="1b8eda36-c3d8-42fe-a0bf-4ca78bbf139c">
+    <value>Category</value>
+  </data>
+  <data name="Str_ClearFilters" xml:space="preserve" id="46c274e4-91ca-414d-9c64-a9d24c450d7d">
+    <value>Clear Filters</value>
+  </data>
+  <data name="Str_ManageCategories" xml:space="preserve" id="52f8db0f-ad9f-4a1d-add5-9d39174c3bcc">
+    <value>Manage Categories</value>
+  </data>
+  <data name="Str_CreateNewModel" xml:space="preserve" id="e729c780-0ee7-48ee-8fb7-624fded93a92">
+    <value>Create New Model</value>
+  </data>
+  <data name="Str_ImportCommonParts" xml:space="preserve" id="72a22e7c-3aca-4fb7-ac2f-405ab4be6179">
+    <value>Import Common Parts</value>
+  </data>
+  <data name="Str_SearchModelPlaceholder" xml:space="preserve" id="a0731270-9e9a-4d7a-bb00-ea43f6f113dc">
+    <value>Search Model...</value>
+  </data>
+  <data name="Str_Add" xml:space="preserve" id="9457bafb-6bde-4a07-bd86-32b61ccc9b5d">
+    <value>Add</value>
+  </data>
+  <data name="Str_ComponentCategory" xml:space="preserve" id="f6b240e8-a9c0-4a0f-b04f-b51814018d55">
+    <value>Component Category</value>
+  </data>
+  <data name="Str_ModelNumberPrompt" xml:space="preserve" id="2c6eb2e6-f674-4d77-aa79-02371732590c">
+    <value>Model Number (e.g. RC0603-10K)</value>
+  </data>
+  <data name="Str_DatasheetPrompt" xml:space="preserve" id="ed99afc4-4c2c-4fc3-a775-7098104276f5">
+    <value>Datasheet Link (URL)</value>
+  </data>
+  <data name="Str_TypePrompt" xml:space="preserve" id="a98bc754-ab7d-4302-b07c-73d78001610e">
+    <value>Type (e.g. Ceramic)</value>
+  </data>
+  <data name="Str_ValuePrompt" xml:space="preserve" id="ddafd071-3926-45c4-947b-d9208ca88329">
+    <value>Value (e.g. 10k)</value>
+  </data>
+  <data name="Str_Create" xml:space="preserve" id="d442fcae-a559-49c6-83bd-f8df1483acc2">
+    <value>Create</value>
+  </data>
+  <data name="Str_AllCategories" xml:space="preserve" id="a290a031-954a-4560-8d3d-4cd8e9cf470b">
+    <value>All Categories</value>
+  </data>
+  <data name="Str_ModelExists" xml:space="preserve" id="af82d852-54d2-42b3-9062-188a004f67d2">
+    <value>Model already exists.</value>
+  </data>
+  <data name="Str_ImportConfirmMsg" xml:space="preserve" id="fd276752-4b22-4ab4-8719-90970cd95a68">
+    <value>This will import common electronic components (Resistors, Capacitors, LEDs, ICs) into your database. Existing models with the same number will be skipped.\n\nContinue?</value>
+  </data>
+  <data name="Str_ImportDatabase" xml:space="preserve" id="9ca84980-c9e9-4663-a8f7-1505b5688465">
+    <value>Import Database</value>
+  </data>
+  <data name="Str_ImportSuccessMsg" xml:space="preserve" id="ca433d44-ed5a-4277-ab17-0aaf503709ee">
+    <value>Successfully imported {0} new models and updated categories.</value>
+  </data>
+  <data name="Str_ImportComplete" xml:space="preserve" id="b4e297f2-2040-4ade-9dab-8069b72c14ea">
+    <value>Import Complete</value>
+  </data>
+  <data name="Str_ImportNoNewMsg" xml:space="preserve" id="75ee253a-6291-416f-b29c-0e4cfb13893c">
+    <value>No new models were added (all already exist). Categories updated.</value>
+  </data>
+  <data name="Str_ConfirmDeleteModel" xml:space="preserve" id="454e1e77-9f4a-487e-9fed-d06bd640e0dc">
+    <value>Are you sure you want to delete model {0}?</value>
+  </data>
+  <data name="Str_InvalidQty" xml:space="preserve" id="7cd41739-6566-4304-b95c-306eee4dd68d">
+    <value>Please enter a valid quantity.</value>
+  </data>
+  <data name="Str_InvalidQtyTitle" xml:space="preserve" id="d3d794d4-485d-4855-9746-aab8abe0e145">
+    <value>Invalid Quantity</value>
+  </data>
+  <data name="Str_SelectModelMsg" xml:space="preserve" id="0e491ea0-e784-45f7-ace8-e36b8c2b276c">
+    <value>Please select a model from the list.</value>
+  </data>
+  <data name="Str_SelectionRequired" xml:space="preserve" id="14c44336-2082-4b57-8b3a-695a6129f19b">
+    <value>Selection Required</value>
+  </data>
+  <data name="Str_EnterModelNumber" xml:space="preserve" id="75e9041e-9c84-4d9a-9b5a-7d68ab97676e">
+    <value>Please enter a model number.</value>
+  </data>
+  <data name="Str_ValidationError" xml:space="preserve" id="e7f8bab6-70fd-45ae-9004-50c256c651e2">
+    <value>Validation Error</value>
+  </data>
+  <data name="Str_SelectCategoryMsg" xml:space="preserve" id="ae7f0e38-e00e-4437-a80d-d6a72bbc958c">
+    <value>Please select a component category.</value>
+  </data>
+  <data name="Str_InvalidComponent" xml:space="preserve" id="060a0dc2-e4a4-419b-bb23-13c0f4f873b9">
+    <value>Invalid component selection.</value>
+  </data>
+  <data name="Str_DeleteSelected" xml:space="preserve" id="358291ac-72e6-41da-92e0-aaafe09075b4">
+    <value>Delete Selected</value>
+  </data>
+  <data name="Str_ImportCommonCategories" xml:space="preserve" id="1736ed6a-0fd3-4e0a-9ddd-1274743d614b">
+    <value>Import Common Categories</value>
+  </data>
+  <data name="Str_Close" xml:space="preserve" id="8e4b8ee0-146b-4e24-9b3f-5f803426e588">
+    <value>Close</value>
+  </data>
+  <data name="Str_ConfirmDeleteCategorySimple" xml:space="preserve" id="3132fd2f-dfe2-411a-9494-b241fd082e96">
+    <value>Are you sure you want to delete '{0}'?</value>
+  </data>
+  <data name="Str_ImportCategoriesSuccess" xml:space="preserve" id="dea29010-28ec-4301-a9ad-9244e2d89281">
+    <value>Imported {0} new categories.</value>
+  </data>
+  <data name="Str_ItemsDatabaseFile" xml:space="preserve" id="24feebb3-0ab3-4afb-9dbe-6e3d808c8aa9">
+    <value>Items Database File</value>
+  </data>
+</root>

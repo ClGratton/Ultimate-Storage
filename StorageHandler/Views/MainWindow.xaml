@@ -4,17 +4,20 @@
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:StorageHandler"
-       xmlns:converters="clr-namespace:StorageHandler.Converters"
+       xmlns:scripts="clr-namespace:StorageHandler.Scripts"
+       xmlns:p="clr-namespace:StorageHandler.Properties"
        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
        mc:Ignorable="d"
        Title="MainWindow"
-       Height="600" Width="920"
+       Height="{DynamicResource DefaultWindowHeight}" Width="{DynamicResource DefaultWindowWidth}"
        WindowStyle="None"
        AllowsTransparency="True"
-       Background="Transparent">
+       Background="Transparent"
+       StateChanged="Window_StateChanged">
 
     <Window.Resources>
-        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <scripts:UrlToVisibilityConverter x:Key="UrlToVisibilityConverter"/>
+        <scripts:NotUrlToVisibilityConverter x:Key="NotUrlToVisibilityConverter"/>
         
         <Style x:Key="MenuButtonTheme" TargetType="RadioButton">
             <Setter Property="Margin" Value="0,0,0,5"/>
@@ -179,7 +182,7 @@
                                     Padding="15,0">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <TextBlock Text="+" FontWeight="Bold" Margin="0,0,10,0"/>
-                                    <TextBlock Text="{DynamicResource Str_NewCategory}"/> 
+                                    <TextBlock Text="{x:Static p:Resources.Str_NewCategory}"/> 
                                 </StackPanel>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -194,42 +197,109 @@
 
             </StackPanel>
 
-            <!-- Top Bar Buttons Removed -->
+            <!-- Top Bar Buttons -->
+            <StackPanel Grid.Row="0" Grid.Column="1" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Top" 
+                        Margin="0,5,20,0"
+                        Panel.ZIndex="100">
+                
+                <!-- Minimize Button -->
+                <Button x:Name="MinimizeButton"
+                        Width="{DynamicResource SmallControlHeight}" Height="{DynamicResource SmallControlHeight}"
+                        Click="MinimizeApp_Click"
+                        Background="{DynamicResource SelectionBrush}"
+                        BorderThickness="0"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        Margin="0,0,5,0"
+                        ToolTip="{x:Static p:Resources.Str_Minimize}">
+                    <TextBlock Text="─" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource SelectionBrush3}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
 
-            <Button x:Name="CloseButton"
-                    Grid.Row="0" Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Margin="0,5,20,0"
-                    Width="{DynamicResource SmallControlHeight}" Height="{DynamicResource SmallControlHeight}"
-                    Click="CloseApp_Click"
-                    Background="{DynamicResource SelectionBrush}"
-                    BorderThickness="0"
-                    Foreground="{DynamicResource TextPrimaryBrush}"
-                    Panel.ZIndex="100"
-                    ToolTip="{DynamicResource Str_CloseApp}">
-                <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Margin="0,0,1,1"/>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Cursor" Value="Hand"/>
-                                            <Setter TargetName="Border" Property="Background" Value="#C42B1C"/>
-                                            <Setter Property="Foreground" Value="White"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-            </Button>
+                <!-- Maximize/Restore Button -->
+                <Button x:Name="MaximizeButton"
+                        Width="{DynamicResource SmallControlHeight}" Height="{DynamicResource SmallControlHeight}"
+                        Click="MaximizeApp_Click"
+                        Background="{DynamicResource SelectionBrush}"
+                        BorderThickness="0"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        Margin="0,0,5,0"
+                        ToolTip="{x:Static p:Resources.Str_Maximize}">
+                    <TextBlock x:Name="MaximizeIcon" Text="☐" FontSize="16" FontWeight="Bold"/>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource SelectionBrush3}"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <!-- Close Button -->
+                <Button x:Name="CloseButton"
+                        Width="{DynamicResource SmallControlHeight}" Height="{DynamicResource SmallControlHeight}"
+                        Click="CloseApp_Click"
+                        Background="{DynamicResource SelectionBrush}"
+                        BorderThickness="0"
+                        Foreground="{DynamicResource TextPrimaryBrush}"
+                        ToolTip="{x:Static p:Resources.Str_CloseApp}">
+                    <TextBlock Text="✕" FontSize="16" FontWeight="Bold" Margin="0,0,1,1"/>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="{DynamicResource BackButtonCornerRadius}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Cursor" Value="Hand"/>
+                                                <Setter TargetName="Border" Property="Background" Value="#C42B1C"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
 
             <Grid Grid.Column="1" Grid.Row="1" Margin="20,10,20,10">
                 <Grid.ColumnDefinitions>
@@ -277,7 +347,7 @@
                          Height="{DynamicResource SmallControlHeight}"
                          VerticalContentAlignment="Center"
                          Style="{StaticResource TextboxTheme}" 
-                         Tag="{DynamicResource Str_SearchPlaceholder}" />
+                         Tag="{x:Static p:Resources.Str_SearchPlaceholder}" />
             </Grid>
 
             <!-- Storage Grid -->
@@ -306,9 +376,9 @@
                 <!-- Columns are generated dynamically in code -->
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="{DynamicResource Str_AddItem}" Click="AddItem_Click"/>
+                        <MenuItem Header="{x:Static p:Resources.Str_AddItem}" Click="AddItem_Click"/>
                         <Separator/>
-                        <MenuItem Header="{DynamicResource Str_DeleteItem}" Click="DeleteItem_Click"/>
+                        <MenuItem Header="{x:Static p:Resources.Str_DeleteItem}" Click="DeleteItem_Click"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
@@ -323,8 +393,8 @@
                         Background="{DynamicResource SelectionBrush2}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
                         BorderThickness="0"
-                        ToolTip="{DynamicResource Str_Revert}">
-                    <TextBlock Text="{DynamicResource Str_Undo}" FontSize="14" FontWeight="Bold"/>
+                        ToolTip="{x:Static p:Resources.Str_Revert}">
+                    <TextBlock Text="{x:Static p:Resources.Str_Undo}" FontSize="14" FontWeight="Bold"/>
                     <Button.Resources>
                         <Style TargetType="Border">
                             <Setter Property="CornerRadius" Value="{DynamicResource BackButtonCornerRadius}"/>
@@ -362,7 +432,7 @@
                         Background="{DynamicResource SelectionBrush}"
                         Foreground="{DynamicResource TextPrimaryBrush}"
                         BorderThickness="0"
-                        ToolTip="{DynamicResource Str_Save}">
+                        ToolTip="{x:Static p:Resources.Str_Save}">
                     <TextBlock Text="💾" FontSize="16"/>
                     <Button.Resources>
                         <Style TargetType="Border">

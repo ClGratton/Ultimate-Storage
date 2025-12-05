@@ -47,34 +47,18 @@ namespace StorageHandler {
         }
 
         private void ApplyLanguage(string languageCode) {
-            string dictPath = "pack://application:,,,/Resources/Strings.xaml"; // Default English
-            
-            if (languageCode.Equals("it-IT", StringComparison.OrdinalIgnoreCase)) {
-                dictPath = "pack://application:,,,/Resources/Strings.it.xaml";
-            }
-
             try {
-                var dict = new ResourceDictionary { Source = new Uri(dictPath, UriKind.Absolute) };
-                
-                // Find and replace the existing Strings dictionary
-                // We assume it's one of the merged dictionaries
-                ResourceDictionary? oldDict = null;
-                foreach (var d in Resources.MergedDictionaries) {
-                    if (d.Source != null && d.Source.OriginalString.Contains("Strings")) {
-                        oldDict = d;
-                        break;
-                    }
-                }
-
-                if (oldDict != null) {
-                    Resources.MergedDictionaries.Remove(oldDict);
-                }
-                
-                Resources.MergedDictionaries.Add(dict);
-                Debug.WriteLine($"App: Applied language dictionary: {dictPath}");
+                var culture = new System.Globalization.CultureInfo(languageCode);
+                System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+                System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+                StorageHandler.Properties.Resources.Culture = culture;
+                Debug.WriteLine($"App: Applied language: {languageCode}");
             } catch (Exception ex) {
                 Debug.WriteLine($"App: Failed to apply language {languageCode}: {ex.Message}");
-                MessageBox.Show($"Failed to load language: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Fallback to English if failed
+                if (languageCode != "en-US") {
+                    ApplyLanguage("en-US");
+                }
             }
         }
 

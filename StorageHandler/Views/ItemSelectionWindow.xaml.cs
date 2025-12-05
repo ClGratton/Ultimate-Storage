@@ -24,7 +24,7 @@ namespace StorageHandler.Views {
         public event Action<List<ComponentModel>, int>? OnItemsAdded;
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public ItemSelectionWindow(ObservableCollection<ComponentModel> models, ObservableCollection<ComponentDefinition> components) {
@@ -44,29 +44,11 @@ namespace StorageHandler.Views {
         private void GenerateColumns() {
             ModelsGrid.Columns.Clear();
 
-            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            
-            foreach (var model in _allModels.Take(50)) {
-                if (!string.IsNullOrEmpty(model.Category)) keys.Add("Category");
-                
-                foreach (var key in model.CustomData.Keys) {
-                    keys.Add(key);
-                }
-            }
-
-            var sortedKeys = keys.OrderBy(k => {
-                if (k.Equals("Id", StringComparison.OrdinalIgnoreCase)) return 0;
-                if (k.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) return 1;
-                if (k.Equals("Category", StringComparison.OrdinalIgnoreCase)) return 2;
-                if (k.Equals("Description", StringComparison.OrdinalIgnoreCase)) return 3;
-                if (k.Equals("Value", StringComparison.OrdinalIgnoreCase)) return 4;
-                if (k.Equals("Type", StringComparison.OrdinalIgnoreCase)) return 5;
-                return 10;
-            }).ToList();
+            var sortedKeys = ColumnHelper.GetSortedKeys(_allModels, "ItemSelection");
 
             string defaultSortHeader = "Category";
-            if (keys.Contains("id")) defaultSortHeader = "id";
-            else if (keys.Contains("ModelNumber")) defaultSortHeader = "ModelNumber";
+            if (sortedKeys.Contains("id", StringComparer.OrdinalIgnoreCase)) defaultSortHeader = "id";
+            else if (sortedKeys.Contains("ModelNumber", StringComparer.OrdinalIgnoreCase)) defaultSortHeader = "ModelNumber";
 
             foreach (var key in sortedKeys) {
                 var column = new DataGridTextColumn {

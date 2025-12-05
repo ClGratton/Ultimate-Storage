@@ -10,7 +10,7 @@ namespace StorageHandler.Views {
         private readonly ObservableCollection<ComponentDefinition> _categories;
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public ManageCategoriesWindow(ObservableCollection<ComponentDefinition> categories) {

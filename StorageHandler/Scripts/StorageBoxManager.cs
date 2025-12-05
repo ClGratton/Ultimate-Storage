@@ -24,7 +24,7 @@ namespace StorageHandler.Scripts {
         private RenameContext? _currentRenameContext;
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public StorageBoxManager(Canvas storageGrid) {

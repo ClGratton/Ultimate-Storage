@@ -1,8 +1,14 @@
 namespace StorageHandler.Config {
     public static class AppConfig {
+        //Windows Constants
+        public const int DefaultWindowWidth = 920;
+        public const int DefaultWindowHeight = 600;
+        
+    
         // Grid & Canvas Constants
         public const double CanvasScaleFactor = 100.0;
-        public const int MaxGridCoordinate = 10;
+        public const int MaxGridWidth = 20;
+        public const int MaxGridHeight = 10;
         public const int MinGridSize = 1;
         
         // UI Interaction Constants
@@ -28,5 +34,8 @@ namespace StorageHandler.Config {
         
         // Animation
         public const double DefaultAnimationDuration = 0.2;
+
+        // Data Handling
+        public const int MaxItemsToScanForColumns = 9999;  // Max items to scan to decide what columns to show
     }
 }

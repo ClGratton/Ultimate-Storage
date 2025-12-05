@@ -7,7 +7,7 @@ namespace StorageHandler.Views {
         public ComponentModel? Result { get; private set; }
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public NewModelWindow(List<ComponentDefinition> components) {

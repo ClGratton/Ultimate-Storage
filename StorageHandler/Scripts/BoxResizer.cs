@@ -41,7 +41,8 @@ namespace StorageHandler.Scripts {
         private const double HandleVisualSize = AppConfig.HandleVisualSize;
         public const double CanvasScaleFactor = AppConfig.CanvasScaleFactor;
         private const int MinGridSize = AppConfig.MinGridSize;
-        private const int MaxGridCoordinate = AppConfig.MaxGridCoordinate;
+        private const int MaxGridWidth = AppConfig.MaxGridWidth;
+        private const int MaxGridHeight = AppConfig.MaxGridHeight;
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new() { WriteIndented = true };
 
@@ -312,8 +313,8 @@ namespace StorageHandler.Scripts {
 
         private bool AdjustAndValidateBounds(int newGridX, int newGridY, int newGridWidth, int newGridHeight) {
             if (newGridX < 0 || newGridY < 0 ||
-                newGridX + newGridWidth > MaxGridCoordinate ||
-                newGridY + newGridHeight > MaxGridCoordinate ||
+                newGridX + newGridWidth > MaxGridWidth ||
+                newGridY + newGridHeight > MaxGridHeight ||
                 newGridWidth < MinGridSize || newGridHeight < MinGridSize)
                 return false;
             return true;
@@ -387,7 +388,7 @@ namespace StorageHandler.Scripts {
                         box.Position[0] = requiredX;
                     }
 
-                    if (box.Position[0] + box.Size[0] > MaxGridCoordinate) return false;
+                    if (box.Position[0] + box.Size[0] > MaxGridWidth) return false;
                 }
             } else if (widthChange < 0) {
                 // Shrink logic remains similar but simpler
@@ -487,7 +488,7 @@ namespace StorageHandler.Scripts {
                         box.Position[1] = requiredY;
                     }
 
-                    if (box.Position[1] + box.Size[1] > MaxGridCoordinate) return false;
+                    if (box.Position[1] + box.Size[1] > MaxGridHeight) return false;
                 }
             } else if (heightChange < 0) {
                 var allBoxesBelow = _rootContainer.Children
@@ -594,8 +595,8 @@ namespace StorageHandler.Scripts {
 
             targetContainer.Position[0] = Math.Max(0, targetContainer.Position[0] + offsetGridX);
             targetContainer.Position[1] = Math.Max(0, targetContainer.Position[1] + offsetGridY);
-            targetContainer.Size[0] = Math.Max(MinGridSize, Math.Min(newGridWidth, MaxGridCoordinate - targetContainer.Position[0]));
-            targetContainer.Size[1] = Math.Max(MinGridSize, Math.Min(newGridHeight, MaxGridCoordinate - targetContainer.Position[1]));
+            targetContainer.Size[0] = Math.Max(MinGridSize, Math.Min(newGridWidth, MaxGridWidth - targetContainer.Position[0]));
+            targetContainer.Size[1] = Math.Max(MinGridSize, Math.Min(newGridHeight, MaxGridHeight - targetContainer.Position[1]));
 
             _storageLoader.SaveTemporary(_rootContainer);
             _refreshUi?.Invoke();

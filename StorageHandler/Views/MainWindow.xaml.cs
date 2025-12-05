@@ -34,7 +34,7 @@ namespace StorageHandler.Views {
         private int _currentDepth = 1; // Start at default depth 1
 
         private string GetStr(string key) {
-            return Application.Current.TryFindResource(key) as string ?? key;
+            return StorageHandler.Properties.Resources.ResourceManager.GetString(key) ?? key;
         }
 
         public MainWindow() {
@@ -717,7 +717,11 @@ namespace StorageHandler.Views {
             if (_storageLoader == null || _boxManager == null) return;
 
             Debug.WriteLine($"NavigateToContainer: Navigating into container {container.Name}");
-            Debug.WriteLine($"NAVIGATION DEBUG: CURRENT LEVEL = {_currentDepth}, TARGET = {container.Name}");
+            
+            // Check if we are just refreshing the current view (e.g. after conversion)
+            bool isRefresh = _currentActiveContainer != null && container.Name == _currentActiveContainer.Name;
+
+            Debug.WriteLine($"NAVIGATION DEBUG: CURRENT LEVEL = {_currentDepth}, TARGET = {container.Name}, REFRESH = {isRefresh}");
 
             // Print parent-child relationships
             Debug.WriteLine("NAVIGATION DEBUG: CONTAINER HIERARCHY:");
@@ -795,8 +799,10 @@ namespace StorageHandler.Views {
                 }
             }
 
-            // Increment depth after navigating down
-            _currentDepth++;
+            // Increment depth only if we are actually navigating to a new level (not refreshing current)
+            if (!isRefresh) {
+                _currentDepth++;
+            }
             Debug.WriteLine($"NavigateToContainer: New depth is {_currentDepth}");
             Debug.WriteLine($"STORAGE PATH: {(_currentParentContainer != null ? _currentParentContainer.Name + " > " : "")}{_currentActiveContainer.Name}");
 
@@ -1029,84 +1035,69 @@ namespace StorageHandler.Views {
             var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             
             // Scan AvailableModels (Catalog)
-            foreach (var model in AvailableModels.Take(50)) {
-                if (!string.IsNullOrEmpty(model.Category)) keys.Add("Category");
-                
-                foreach (var key in model.CustomData.Keys) {
-                    keys.Add(key);
-                }
-            }
+            var catalogKeys = ColumnHelper.GetSortedKeys(AvailableModels, "Catalog");
+            foreach(var k in catalogKeys) keys.Add(k);
 
             // Scan current items (Inventory)
             if (_currentActiveContainer != null && _currentActiveContainer.Items != null) {
-                 foreach (var item in _currentActiveContainer.Items.Take(50)) {
-                     if (!string.IsNullOrEmpty(item.Id)) keys.Add("Id");
-                     if (!string.IsNullOrEmpty(item.Category)) keys.Add("Category");
-
-                     foreach (var key in item.CustomData.Keys) {
-                         keys.Add(key);
-                     }
-                 }
+                 var inventoryKeys = ColumnHelper.GetSortedKeys(_currentActiveContainer.Items, _currentActiveContainer.Name);
+                 foreach(var k in inventoryKeys) keys.Add(k);
             }
 
             // Always ensure Quantity is present for storage
             keys.Add("Quantity");
 
-            // Sort keys: Id first, then standard, then custom, Quantity last
-            var sortedKeys = keys.OrderBy(k => {
-                if (k.Equals("Id", StringComparison.OrdinalIgnoreCase)) return 0;
-                if (k.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) return 1;
-                if (k.Equals("Category", StringComparison.OrdinalIgnoreCase)) return 2;
-                if (k.Equals("Description", StringComparison.OrdinalIgnoreCase)) return 3;
-                if (k.Equals("Value", StringComparison.OrdinalIgnoreCase)) return 4;
-                if (k.Equals("Type", StringComparison.OrdinalIgnoreCase)) return 5;
-                if (k.Equals("Quantity", StringComparison.OrdinalIgnoreCase)) return 99;
-                return 10;
-            }).ToList();
+            // Sort keys
+            var sortedKeys = ColumnHelper.SortKeys(keys);
 
             // Create columns
             foreach (var key in sortedKeys) {
                 DataGridColumn column;
 
-                if (key.Equals("DatasheetLink", StringComparison.OrdinalIgnoreCase)) {
-                    // Special template column for Datasheet
-                    var templateColumn = new DataGridTemplateColumn {
-                        Header = GetStr("Str_Datasheet"),
-                        Width = AppConfig.ColWidth_Datasheet,
-                        IsReadOnly = true,
-                        SortMemberPath = $"CustomData[{key}]" // Enable sorting for template column
-                    };
-                    
-                    // Create DataTemplate in code
-                    var dataTemplate = new DataTemplate();
-                    var buttonFactory = new FrameworkElementFactory(typeof(Button));
-                    buttonFactory.SetValue(Button.ContentProperty, "📄");
-                    buttonFactory.SetValue(Button.ToolTipProperty, new Binding($"CustomData[{key}]"));
-                    buttonFactory.SetValue(Button.VisibilityProperty, new Binding($"CustomData[{key}]") { Converter = (IValueConverter)FindResource("StringToVisibilityConverter") });
-                    buttonFactory.SetValue(Button.BackgroundProperty, Brushes.Transparent);
-                    buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
-                    buttonFactory.SetValue(Button.ForegroundProperty, FindResource("PrimaryBrush"));
-                    buttonFactory.SetValue(Button.FontSizeProperty, 16.0);
-                    buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(OpenDatasheet_Click));
-                    
-                    dataTemplate.VisualTree = buttonFactory;
-                    templateColumn.CellTemplate = dataTemplate;
-                    column = templateColumn;
-                } else {
-                    var textColumn = new DataGridTextColumn {
-                        Header = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key),
-                        Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-                    };
+                // Use a template column for all custom data to support dynamic links
+                var templateColumn = new DataGridTemplateColumn {
+                    Header = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key),
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                    IsReadOnly = true,
+                    SortMemberPath = $"CustomData[{key}]"
+                };
 
-                    if (key == "Id" || key == "Category" || key == "Quantity") {
-                        textColumn.Binding = new Binding(key);
-                        if (key != "Quantity") textColumn.IsReadOnly = true; // Only Quantity is editable in this view
-                    } else {
-                        textColumn.Binding = new Binding($"CustomData[{key}]");
-                        textColumn.IsReadOnly = true;
-                    }
-                    column = textColumn;
-                }
+                // Create DataTemplate in code
+                var dataTemplate = new DataTemplate();
+                var gridFactory = new FrameworkElementFactory(typeof(Grid));
+
+                // 1. TextBlock for non-link text
+                var textBlockFactory = new FrameworkElementFactory(typeof(TextBlock));
+                textBlockFactory.SetValue(TextBlock.TextProperty, new Binding($"CustomData[{key}]"));
+                textBlockFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+                textBlockFactory.SetValue(TextBlock.VisibilityProperty, new Binding($"CustomData[{key}]") { 
+                    Converter = (IValueConverter)FindResource("NotUrlToVisibilityConverter"),
+                    FallbackValue = Visibility.Visible,
+                    TargetNullValue = Visibility.Visible
+                });
+                gridFactory.AppendChild(textBlockFactory);
+
+                // 2. Button for links (Paperclip icon)
+                var buttonFactory = new FrameworkElementFactory(typeof(Button));
+                buttonFactory.SetValue(Button.ContentProperty, "📎"); // Paperclip icon
+                buttonFactory.SetValue(Button.ToolTipProperty, new Binding($"CustomData[{key}]"));
+                buttonFactory.SetValue(Button.TagProperty, new Binding($"CustomData[{key}]"));
+                buttonFactory.SetValue(Button.VisibilityProperty, new Binding($"CustomData[{key}]") { 
+                    Converter = (IValueConverter)FindResource("UrlToVisibilityConverter"),
+                    FallbackValue = Visibility.Collapsed,
+                    TargetNullValue = Visibility.Collapsed
+                });
+                buttonFactory.SetValue(Button.BackgroundProperty, Brushes.Transparent);
+                buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
+                buttonFactory.SetValue(Button.ForegroundProperty, FindResource("PrimaryBrush"));
+                buttonFactory.SetValue(Button.FontSizeProperty, 16.0);
+                buttonFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Left);
+                buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(OpenDatasheet_Click));
+                gridFactory.AppendChild(buttonFactory);
+
+                dataTemplate.VisualTree = gridFactory;
+                templateColumn.CellTemplate = dataTemplate;
+                column = templateColumn;
 
                 // Special widths
                 if (key.Equals("Description", StringComparison.OrdinalIgnoreCase)) column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
@@ -1116,6 +1107,24 @@ namespace StorageHandler.Views {
                 if (key.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_ModelNumber;
                 if (key.Equals("Category", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Category;
                 if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) column.Width = AppConfig.ColWidth_Id;
+                if (key.Equals("DatasheetLink", StringComparison.OrdinalIgnoreCase) || key.Contains("Link") || key.Contains("Datasheet")) column.Width = AppConfig.ColWidth_Datasheet;
+
+                // Handle special columns that are not in CustomData (Id, Category, Quantity)
+                if (key == "Id" || key == "Category" || key == "Quantity") {
+                    var textColumn = new DataGridTextColumn {
+                        Header = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(key),
+                        Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                        Binding = new Binding(key)
+                    };
+                    if (key != "Quantity") textColumn.IsReadOnly = true;
+                    
+                    // Re-apply special widths for these standard columns
+                    if (key == "Quantity") textColumn.Width = AppConfig.ColWidth_Quantity;
+                    if (key == "Category") textColumn.Width = AppConfig.ColWidth_Category;
+                    if (key == "Id") textColumn.Width = AppConfig.ColWidth_Id;
+
+                    column = textColumn;
+                }
 
                 // Default Sort for ID
                 if (key.Equals("Id", StringComparison.OrdinalIgnoreCase)) {
@@ -1199,9 +1208,11 @@ namespace StorageHandler.Views {
             }
             
             if (itemsAdded) {
+                ColumnHelper.InvalidateCache(_currentActiveContainer.Name);
                 _storageLoader.SaveItems(_currentActiveContainer.Name, _currentActiveContainer.Items);
                 
                 // Refresh grid
+                GenerateItemsGridColumns();
                 ItemsGrid.ItemsSource = null;
                 ItemsGrid.ItemsSource = _currentActiveContainer.Items;
             }
@@ -1212,9 +1223,11 @@ namespace StorageHandler.Views {
         private void DeleteItem_Click(object sender, RoutedEventArgs e) {
             if (ItemsGrid.SelectedItem is StorageItem item && _currentActiveContainer != null && _storageLoader != null) {
                 _currentActiveContainer.Items.Remove(item);
+                ColumnHelper.InvalidateCache(_currentActiveContainer.Name);
                 _storageLoader.SaveItems(_currentActiveContainer.Name, _currentActiveContainer.Items);
                 
                 // Refresh grid
+                GenerateItemsGridColumns();
                 ItemsGrid.ItemsSource = null;
                 ItemsGrid.ItemsSource = _currentActiveContainer.Items;
             }
@@ -1238,8 +1251,8 @@ namespace StorageHandler.Views {
 
 
         private void OpenDatasheet_Click(object sender, RoutedEventArgs e) {
-            if (sender is Button button && button.DataContext is StorageItem item) {
-                if (item.CustomData.TryGetValue("DatasheetLink", out string? link) && !string.IsNullOrEmpty(link)) {
+            if (sender is Button button) {
+                if (button.Tag is string link && !string.IsNullOrEmpty(link)) {
                     try {
                         var psi = new ProcessStartInfo {
                             FileName = link,
@@ -1272,6 +1285,30 @@ namespace StorageHandler.Views {
                 // If Cancel, do nothing
             } else {
                 Application.Current.Shutdown();
+            }
+        }
+
+        private void MinimizeApp_Click(object sender, RoutedEventArgs e) {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeApp_Click(object sender, RoutedEventArgs e) {
+            if (WindowState == WindowState.Maximized) {
+                WindowState = WindowState.Normal;
+            } else {
+                WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e) {
+            if (MaximizeIcon == null) return;
+            
+            if (WindowState == WindowState.Maximized) {
+                MaximizeIcon.Text = "❐";
+                MaximizeButton.ToolTip = GetStr("Str_Restore");
+            } else {
+                MaximizeIcon.Text = "☐";
+                MaximizeButton.ToolTip = GetStr("Str_Maximize");
             }
         }
 

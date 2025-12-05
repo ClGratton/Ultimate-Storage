@@ -12,6 +12,9 @@
     <system:String x:Key="Str_Save">Save Changes</system:String>
     <system:String x:Key="Str_Revert">Revert Changes</system:String>
     <system:String x:Key="Str_CloseApp">Close Application</system:String>
+    <system:String x:Key="Str_Minimize">Minimize</system:String>
+    <system:String x:Key="Str_Maximize">Maximize</system:String>
+    <system:String x:Key="Str_Restore">Restore</system:String>
     <system:String x:Key="Str_Settings">Settings</system:String>
     
     <!-- DataGrid Headers -->

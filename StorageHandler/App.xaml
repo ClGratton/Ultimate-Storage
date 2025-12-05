@@ -8,7 +8,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Theme/DarkTheme.xaml"/>
                 <ResourceDictionary Source="Theme/Dimensions.xaml"/>
-                <ResourceDictionary Source="Resources/Strings.xaml"/>
+                <!-- <ResourceDictionary Source="Resources/Strings.xaml"/> -->
                 <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"/>
                 <ResourceDictionary Source="Theme/TextboxTheme.xaml"/>
                 <ResourceDictionary Source="Theme/DataGridTheme.xaml"/>

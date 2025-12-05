@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using StorageHandler.Config;
 
 namespace StorageHandler.Views {
     public partial class NewCategoryWindow : Window {
@@ -47,7 +48,7 @@ namespace StorageHandler.Views {
                     var root = doc.RootElement;
                     if (root.ValueKind == JsonValueKind.Array) {
                         var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                        foreach (var item in root.EnumerateArray().Take(50)) {
+                        foreach (var item in root.EnumerateArray().Take(AppConfig.MaxItemsToScanForColumns)) {
                             foreach (var prop in item.EnumerateObject()) {
                                 keys.Add(prop.Name);
                             }
