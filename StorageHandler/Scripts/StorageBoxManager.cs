@@ -147,7 +147,6 @@ namespace StorageHandler.Scripts {
                 return;
             }
 
-            // Apply the rename on the model
             var existing = FindContainerByName(_rootContainer, container.Name);
             string oldName = container.Name;
             if (existing != null) {
@@ -158,7 +157,6 @@ namespace StorageHandler.Scripts {
             // Rename item file if it exists
             _storageLoader.RenameItemFile(oldName, newName);
 
-            // Update UI text
             nameText.Text = newName;
             nameEditor.Visibility = Visibility.Collapsed;
             nameText.Visibility = Visibility.Visible;

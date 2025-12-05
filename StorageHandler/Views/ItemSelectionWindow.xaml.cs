@@ -33,20 +33,17 @@ namespace StorageHandler.Views {
             _allModels = models;
             _components = components;
 
-            // Setup Grid - Initialize View BEFORE setting filters that trigger events
             _modelsView = CollectionViewSource.GetDefaultView(_allModels);
             _modelsView.Filter = FilterModels;
             
             ModelsGrid.ItemsSource = _modelsView;
 
-            // Generate columns dynamically
             GenerateColumns();
         }
 
         private void GenerateColumns() {
             ModelsGrid.Columns.Clear();
 
-            // Determine available keys dynamically by scanning the data
             var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             
             foreach (var model in _allModels.Take(50)) {
@@ -57,7 +54,6 @@ namespace StorageHandler.Views {
                 }
             }
 
-            // Sort keys: Id first, then standard, then custom
             var sortedKeys = keys.OrderBy(k => {
                 if (k.Equals("Id", StringComparison.OrdinalIgnoreCase)) return 0;
                 if (k.Equals("ModelNumber", StringComparison.OrdinalIgnoreCase)) return 1;
@@ -68,7 +64,6 @@ namespace StorageHandler.Views {
                 return 10;
             }).ToList();
 
-            // Create columns
             string defaultSortHeader = "Category";
             if (keys.Contains("id")) defaultSortHeader = "id";
             else if (keys.Contains("ModelNumber")) defaultSortHeader = "ModelNumber";
@@ -85,7 +80,6 @@ namespace StorageHandler.Views {
                     column.Binding = new Binding($"CustomData[{key}]");
                 }
 
-                // Special width for Description
                 if (key == "Description") column.Width = new DataGridLength(2, DataGridLengthUnitType.Star);
                 if (key == "Id") column.Width = AppConfig.ColWidth_Id;
                 if (key == "Value") column.Width = AppConfig.ColWidth_ValueSmall;
@@ -98,7 +92,6 @@ namespace StorageHandler.Views {
                 ModelsGrid.Columns.Add(column);
             }
 
-            // Apply default sort
             _modelsView.SortDescriptions.Clear();
             string sortProperty = defaultSortHeader == "Category" ? "Category" : $"CustomData[{defaultSortHeader}]";
             _modelsView.SortDescriptions.Add(new SortDescription(sortProperty, ListSortDirection.Ascending));
@@ -107,17 +100,14 @@ namespace StorageHandler.Views {
         private bool FilterModels(object item) {
             if (item is not ComponentModel model) return false;
 
-            // Search Box (Multi-token search across all attributes)
             if (!string.IsNullOrWhiteSpace(SearchBox.Text)) {
                 var searchTerms = SearchBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 
                 foreach (var term in searchTerms) {
                     bool termFound = false;
                     
-                    // Check standard properties
                     if (model.Category?.Contains(term, StringComparison.OrdinalIgnoreCase) == true) termFound = true;
                     
-                    // Check custom data
                     if (!termFound) {
                         foreach (var value in model.CustomData.Values) {
                             if (value.Contains(term, StringComparison.OrdinalIgnoreCase)) {
@@ -127,7 +117,7 @@ namespace StorageHandler.Views {
                         }
                     }
                     
-                    if (!termFound) return false; // If any term is missing, it's not a match
+                    if (!termFound) return false;
                 }
             }
 
@@ -156,7 +146,6 @@ namespace StorageHandler.Views {
                 var newModel = window.Result;
                 
                 if (newModel != null) {
-                    // Check if exists
                     string newModelNum = newModel.CustomData.ContainsKey("ModelNumber") ? newModel.CustomData["ModelNumber"] : "";
                     bool exists = false;
                     if (!string.IsNullOrEmpty(newModelNum)) {
@@ -166,10 +155,9 @@ namespace StorageHandler.Views {
                     if (!exists) {
                         _allModels.Add(newModel);
                         
-                        // Select the new model
                         SearchBox.Text = newModelNum;
                         _modelsView.Refresh();
-                        GenerateColumns(); // Regenerate columns in case new fields were added
+                        GenerateColumns();
                     } else {
                         MessageBox.Show(GetStr("Str_ModelExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
                     }
@@ -204,19 +192,13 @@ namespace StorageHandler.Views {
                     }
                 }
 
-                // For backward compatibility or single selection convenience
                 if (SelectedModels.Count > 0) {
                     SelectedModel = SelectedModels[0];
                 }
 
-                // Trigger event to add items
                 OnItemsAdded?.Invoke(new List<ComponentModel>(SelectedModels), SelectedQuantity);
 
-                // Clear selection to allow adding more
                 ModelsGrid.SelectedItems.Clear();
-                
-                // Optional: Provide feedback?
-                // For now, clearing the selection is the visual cue.
             } else {
                 MessageBox.Show(GetStr("Str_SelectModelMsg"), GetStr("Str_SelectionRequired"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }

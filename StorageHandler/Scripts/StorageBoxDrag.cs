@@ -20,7 +20,6 @@ namespace StorageHandler.Scripts {
         private readonly BoxResizer _boxResizer;
         private readonly Action? _refreshUi;
 
-        // Drag tracking
         private bool _isDragging;
         private Point _dragStartPoint;
         private Border? _currentDragBox;

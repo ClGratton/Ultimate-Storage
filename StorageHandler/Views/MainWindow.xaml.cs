@@ -40,15 +40,9 @@ namespace StorageHandler.Views {
         public MainWindow() {
             InitializeComponent();
 
-            // Initial load will be handled by the Checked event of the default RadioButton
-            // But we need to initialize managers first
             _boxManager = new StorageBoxManager(StorageGrid);
             _boxManager.Box_MouseDoubleClick += Box_MouseDoubleClick;
             
-            // We need a temporary loader to initialize DisplayManager and ColorEditor initially
-            // or we can defer their full initialization until LoadStorageCategory is called.
-            // However, DisplayManager needs a loader in constructor.
-            // Let's initialize with default path first.
             // Migration: Rename storage1.json to storage_electronics.json if it exists and the new one doesn't
             string oldDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage1.json");
             string newDefaultPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Database", "Storage", "storage_electronics.json");
@@ -61,8 +55,6 @@ namespace StorageHandler.Views {
                 }
             }
 
-            // Initialize with a dummy path or the first available category
-            // We'll let LoadCustomCategories populate the UI and then select the first one
             string initialPath = File.Exists(newDefaultPath) ? newDefaultPath : oldDefaultPath;
             _storageLoader = new StorageLoader(initialPath);
             
@@ -71,18 +63,15 @@ namespace StorageHandler.Views {
 
             LoadCustomCategories();
 
-            // Select the first category if available
             if (CategoryStackPanel.Children.Count > 1 && CategoryStackPanel.Children[0] is RadioButton firstRb) {
                 firstRb.IsChecked = true;
-                // The Checked event will trigger LoadStorageCategory
             } else {
-                // No categories exist?
                 ClearView();
             }
         }
 
         private void Category_Checked(object sender, RoutedEventArgs e) {
-            if (_boxManager == null) return; // Too early
+            if (_boxManager == null) return;
 
             if (sender is RadioButton rb && rb.Tag is string category) {
                 LoadStorageCategory(category);
@@ -187,10 +176,8 @@ namespace StorageHandler.Views {
 
                 if (string.IsNullOrEmpty(categoryName)) return;
 
-                // Sanitize for filename
                 string safeName = string.Join("", categoryName.Split(System.IO.Path.GetInvalidFileNameChars()));
                 
-                // Check if category already exists in UI
                 foreach (var child in CategoryStackPanel.Children) {
                     if (child is RadioButton rb && rb.Tag is string tag && tag.Equals(safeName.ToLower(), StringComparison.OrdinalIgnoreCase)) {
                         MessageBox.Show(GetStr("Str_CategoryExists"), GetStr("Str_Error"), MessageBoxButton.OK, MessageBoxImage.Error);
@@ -206,7 +193,6 @@ namespace StorageHandler.Views {
                     return;
                 }
 
-                // Save Component Definition
                 if (_storageLoader != null) {
                     var components = _storageLoader.LoadComponents();
                     var def = components.FirstOrDefault(c => c.Name.Equals(safeName.ToLower(), StringComparison.OrdinalIgnoreCase));
@@ -219,7 +205,6 @@ namespace StorageHandler.Views {
                     _storageLoader.SaveComponents(components);
                 }
 
-                // Create initial storage file with the selected items path
                 var initialContainer = new StorageContainer {
                     Name = categoryName,
                     Type = "container",
@@ -256,12 +241,10 @@ namespace StorageHandler.Views {
             foreach (var file in files) {
                 string filename = System.IO.Path.GetFileName(file);
                 
-                // Skip temp files
                 if (filename.Contains(".temp")) continue;
 
                 string category = filename.Replace("storage_", "").Replace(".json", "");
                 
-                // Convert to Title Case for display
                 string displayName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category);
                 AddCategoryButton(category, displayName);
             }

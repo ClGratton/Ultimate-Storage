@@ -85,7 +85,6 @@ namespace StorageHandler.Scripts {
             
             string standardPath = CustomComponentsPath ?? _componentsPath;
 
-            // Load Components from File
             if (File.Exists(standardPath)) {
                 try {
                     var json = File.ReadAllText(standardPath);
@@ -96,7 +95,7 @@ namespace StorageHandler.Scripts {
                 }
             } else if (CustomComponentsPath == null) {
                 // First run: Initialize with empty defaults or create file
-                SaveComponents(components); // Create the file
+                SaveComponents(components);
             }
 
             return components;
