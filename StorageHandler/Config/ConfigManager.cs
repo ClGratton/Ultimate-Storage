@@ -8,7 +8,11 @@ namespace StorageHandler.Config {
         private static readonly string ConfigFileName = "userconfig.json";
         private static readonly string ConfigPath = Path.Combine(AppContext.BaseDirectory, ConfigFileName);
         
+        private static readonly string StateFileName = "appstate.json";
+        private static readonly string StatePath = Path.Combine(AppContext.BaseDirectory, StateFileName);
+
         public static UserConfig Current { get; private set; } = new UserConfig();
+        public static AppState State { get; private set; } = new AppState();
 
         public static string StorageDirectory {
             get {
@@ -26,6 +30,7 @@ namespace StorageHandler.Config {
         }
 
         public static void Load() {
+            // Load Config
             if (File.Exists(ConfigPath)) {
                 try {
                     var json = File.ReadAllText(ConfigPath);
@@ -33,15 +38,29 @@ namespace StorageHandler.Config {
                     if (config != null) {
                         Current = config;
                         Debug.WriteLine($"ConfigManager: Loaded config. Language: {Current.Language}, Theme: {Current.Theme}");
-                        return;
                     }
                 } catch (Exception ex) {
                     Debug.WriteLine($"ConfigManager: Failed to load config: {ex.Message}");
                 }
+            } else {
+                Save(); // Save default config
             }
-            
-            // If load failed or file doesn't exist, save default
-            Save();
+
+            // Load State
+            if (File.Exists(StatePath)) {
+                try {
+                    var json = File.ReadAllText(StatePath);
+                    var state = JsonSerializer.Deserialize<AppState>(json);
+                    if (state != null) {
+                        State = state;
+                        Debug.WriteLine("ConfigManager: Loaded app state.");
+                    }
+                } catch (Exception ex) {
+                    Debug.WriteLine($"ConfigManager: Failed to load app state: {ex.Message}");
+                }
+            } else {
+                SaveState(); // Save default state
+            }
         }
 
         public static void Save() {
@@ -52,6 +71,17 @@ namespace StorageHandler.Config {
                 Debug.WriteLine("ConfigManager: Saved config.");
             } catch (Exception ex) {
                 Debug.WriteLine($"ConfigManager: Failed to save config: {ex.Message}");
+            }
+        }
+
+        public static void SaveState() {
+            try {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                var json = JsonSerializer.Serialize(State, options);
+                File.WriteAllText(StatePath, json);
+                Debug.WriteLine("ConfigManager: Saved app state.");
+            } catch (Exception ex) {
+                Debug.WriteLine($"ConfigManager: Failed to save app state: {ex.Message}");
             }
         }
     }
