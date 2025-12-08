@@ -5,6 +5,7 @@ using System.Diagnostics;
 
 namespace StorageHandler.Config {
     public static class ConfigManager {
+        //Initialization of dynamic variables
         private static readonly string ConfigFileName = "userconfig.json";
         private static readonly string ConfigPath = Path.Combine(AppContext.BaseDirectory, ConfigFileName);
         
@@ -29,8 +30,7 @@ namespace StorageHandler.Config {
             }
         }
 
-        public static void Load() {
-            // Load Config
+        public static void LoadConfig() {
             if (File.Exists(ConfigPath)) {
                 try {
                     var json = File.ReadAllText(ConfigPath);
@@ -45,8 +45,9 @@ namespace StorageHandler.Config {
             } else {
                 Save(); // Save default config
             }
+        }
 
-            // Load State
+        public static void LoadState() {
             if (File.Exists(StatePath)) {
                 try {
                     var json = File.ReadAllText(StatePath);
