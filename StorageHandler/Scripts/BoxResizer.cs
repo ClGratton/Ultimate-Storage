@@ -165,42 +165,17 @@ namespace StorageHandler.Scripts {
             _isDragging = false;
             if (sender is UIElement uiElement) uiElement.ReleaseMouseCapture();
 
-            int finalGridWidth = (int)Math.Round(_currentBox.Width / CanvasScaleFactor);
-            int finalGridHeight = (int)Math.Round(_currentBox.Height / CanvasScaleFactor);
-            int finalGridX = (int)Math.Round(Canvas.GetLeft(_currentBox) / CanvasScaleFactor);
-            int finalGridY = (int)Math.Round(Canvas.GetTop(_currentBox) / CanvasScaleFactor);
-
-            if (finalGridX < 0 || finalGridY < 0 || finalGridWidth < MinGridSize || finalGridHeight < MinGridSize) {
-                RevertCurrentBoxToOriginalState();
-                _originalChildPositions.Clear();
-                return;
-            }
-
-            // Ensure _rootContainer reflects the state corresponding to finalGridWidth/Height.
-            // The last drag event might have failed (reverting memory to original), but the UI shows the last valid size.
-            // We need to re-apply the moves for the final size before saving.
-            if (!IsValidResize(_currentContainer, finalGridWidth, finalGridHeight, false, false, null)) {
-                RevertCurrentBoxToOriginalState();
-                _originalChildPositions.Clear();
-                _currentBox = null;
-                _currentContainer = null;
-                _resizeHandle = null;
-                return;
-            }
-
-            bool hasSizeChanged = finalGridWidth != _originalGridWidth || finalGridHeight != _originalGridHeight;
+            // Trust the current state that was validated during drag - don't recalculate
+            // The preview already shows the correct positions, just save them
+            bool hasSizeChanged = _currentContainer.Size[0] != _originalGridWidth || _currentContainer.Size[1] != _originalGridHeight;
             bool hasPositionChanged = _originalChildPositions.TryGetValue(_currentContainer.Name, out var originalPos) &&
-                                      (finalGridX != originalPos[0] || finalGridY != originalPos[1]);
+                                      (_currentContainer.Position[0] != originalPos[0] || _currentContainer.Position[1] != originalPos[1]);
 
             if (hasSizeChanged || hasPositionChanged) {
                 try {
                     if (_rootContainer != null) {
-                        var containerInRoot = _rootContainer.Children.FirstOrDefault(c => c.Name == _currentContainer.Name);
-                        if (containerInRoot != null) {
-                            containerInRoot.Size = new[] { finalGridWidth, finalGridHeight };
-                            containerInRoot.Position = new[] { finalGridX, finalGridY };
-                        }
-
+                        // The container state is already correct from the last successful drag validation
+                        // Just save it
                         var clonedRootForSave = JsonSerializer.Deserialize<StorageContainer>(
                             JsonSerializer.Serialize(_rootContainer, JsonSerializerOptions), JsonSerializerOptions);
 
