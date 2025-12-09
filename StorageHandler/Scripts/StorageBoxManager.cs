@@ -48,19 +48,34 @@ namespace StorageHandler.Scripts {
         }
 
         public void AddStorageBox(StorageContainer container) {
-            var box = new Border {
+            var outerBorder = new Border {
                 Width = container.Size[0] * AppConfig.CanvasScaleFactor,
                 Height = container.Size[1] * AppConfig.CanvasScaleFactor,
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(container.Color)),
                 BorderBrush = Brushes.Black,
                 BorderThickness = new System.Windows.Thickness(AppConfig.BoxBorderThickness),
                 CornerRadius = new System.Windows.CornerRadius(AppConfig.BoxCornerRadius),
                 DataContext = container
             };
 
+            var box = new Border {
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(container.Color)),
+                CornerRadius = new System.Windows.CornerRadius(AppConfig.BoxCornerRadius - 1),
+                Opacity = container.IsItemContainer ? 0.9 : 1.0
+            };
+
+            // Visual distinction for item lists: inner white border
+            if (container.IsItemContainer) {
+                box.BorderBrush = new SolidColorBrush(Colors.White);
+                box.BorderThickness = new System.Windows.Thickness(5.0);
+            }
+
+            outerBorder.Child = box;
+            var finalBox = outerBorder;
+
+            var textColor = AppConfig.GetTextColorForBackground(container.Color);
             var nameText = new TextBlock {
                 Text = container.Name,
-                Foreground = Brushes.Black,
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textColor)),
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -82,12 +97,12 @@ namespace StorageHandler.Scripts {
             grid.Children.Add(nameEditor);
             box.Child = grid;
 
-            Canvas.SetLeft(box, container.Position[0] * AppConfig.CanvasScaleFactor);
-            Canvas.SetTop(box, container.Position[1] * AppConfig.CanvasScaleFactor);
+            Canvas.SetLeft(finalBox, container.Position[0] * AppConfig.CanvasScaleFactor);
+            Canvas.SetTop(finalBox, container.Position[1] * AppConfig.CanvasScaleFactor);
 
-            _boxDrag?.AttachDragHandlers(box, container);
+            _boxDrag?.AttachDragHandlers(finalBox, container);
 
-            box.MouseLeftButtonDown += (sender, e) => {
+            finalBox.MouseLeftButtonDown += (sender, e) => {
                 if (e.ClickCount == 2) {
                     Box_MouseDoubleClick?.Invoke(sender, e);
                 }
@@ -116,9 +131,9 @@ namespace StorageHandler.Scripts {
                 }
             };
 
-            _storageGrid.Children.Add(box);
+            _storageGrid.Children.Add(finalBox);
 
-            TryAddResizeHandle(box, container);
+            TryAddResizeHandle(finalBox, container);
         }
 
         private void BeginRename(StorageContainer container, TextBlock nameText, TextBox nameEditor) {

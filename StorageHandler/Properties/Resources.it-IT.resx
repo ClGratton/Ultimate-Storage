@@ -124,6 +124,9 @@
   <data name="Str_DeleteBox" xml:space="preserve" id="54d148aa-1a29-4613-932c-b3ef346ddbc9">
     <value>Elimina Scatola</value>
   </data>
+  <data name="Str_ChangeColor" xml:space="preserve" id="b6c4d8e0-2f3g-5b6c-0d9e-8f7g6b5c4d3e">
+    <value>Cambia Colore</value>
+  </data>
   <data name="Str_NavigateUp" xml:space="preserve" id="fb521574-21e0-4503-bac9-161f958845d8">
     <value>Sali di Livello</value>
   </data>

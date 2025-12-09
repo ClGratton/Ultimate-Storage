@@ -24,7 +24,6 @@ namespace StorageHandler.Views {
         private StorageLoader? _storageLoader;
         private readonly StorageBoxManager? _boxManager;
         private readonly StorageDisplayManager? _displayManager;
-        private readonly ColorEditor? _colorEditor;
         private StorageContainer? _rootContainer;
 
         public ObservableCollection<ComponentDefinition> AvailableComponents { get; set; } = new ObservableCollection<ComponentDefinition>();
@@ -63,7 +62,6 @@ namespace StorageHandler.Views {
             _storageLoader = new StorageLoader(initialPath);
             
             _displayManager = new StorageDisplayManager(_storageLoader, _boxManager, StorageGrid);
-            _colorEditor = new ColorEditor(_storageLoader, _boxManager, null); // Root container will be set later
 
             LoadCustomCategories();
 
@@ -291,7 +289,6 @@ namespace StorageHandler.Views {
                 
                 // Update managers with new loader
                 if (_displayManager != null) _displayManager.UpdateLoader(_storageLoader);
-                if (_colorEditor != null) _colorEditor.UpdateLoader(_storageLoader);
                 if (_boxManager != null) _boxManager.UpdateLoader(_storageLoader);
 
                 _rootContainer = _storageLoader.LoadStorage();
@@ -317,7 +314,6 @@ namespace StorageHandler.Views {
                 }
 
                 if (_boxManager != null) _boxManager.InitializeResizer(_storageLoader, _rootContainer);
-                if (_colorEditor != null) _colorEditor.UpdateContainer(_rootContainer);
 
                 // Reset navigation state
                 _currentParentContainer = null;
@@ -455,9 +451,6 @@ namespace StorageHandler.Views {
             if (_boxManager != null && _rootContainer != null) {
                 _boxManager.InitializeResizer(_storageLoader, _rootContainer);
             }
-            if (_colorEditor != null) {
-                _colorEditor.UpdateContainer(_rootContainer);
-            }
 
             LoadAndDisplayStorage();
         }
@@ -591,6 +584,13 @@ namespace StorageHandler.Views {
         private void ShowDeleteBoxMenu(Border border, StorageContainer container, Point point) {
             var contextMenu = new ContextMenu();
 
+            // Change Color option
+            var changeColorMenuItem = new MenuItem { Header = GetStr("Str_ChangeColor") };
+            changeColorMenuItem.Click += (s, e) => OpenColorPicker(container);
+            contextMenu.Items.Add(changeColorMenuItem);
+
+            contextMenu.Items.Add(new Separator());
+
             // Delete option
             var deleteMenuItem = new MenuItem { Header = GetStr("Str_DeleteBox") };
             deleteMenuItem.Click += (s, e) => DeleteBox(container);
@@ -674,6 +674,26 @@ namespace StorageHandler.Views {
             }
         }
 
+        private void OpenColorPicker(StorageContainer container) {
+            var colorPicker = new ColorPickerWindow(container) {
+                Owner = this
+            };
+
+            if (colorPicker.ShowDialog() == true && colorPicker.SelectedColor != null) {
+                container.Color = colorPicker.SelectedColor;
+                
+                // Save changes
+                if (_storageLoader != null && _rootContainer != null) {
+                    _storageLoader.SaveTemporary(_rootContainer);
+                    
+                    // Clear and reload the display
+                    if (_boxManager != null) {
+                        _boxManager.ClearStorageGrid();
+                    }
+                    LoadAndDisplayStorage();
+                }
+            }
+        }
 
 
 
@@ -681,12 +701,23 @@ namespace StorageHandler.Views {
         private void AddNewBox(int gridX, int gridY) {
             if (_rootContainer == null || _storageLoader == null || _boxManager == null) return;
 
+            // Collect used colors at the current level
+            var usedColors = new List<string>();
+            if (_currentDepth == 1) {
+                usedColors = _rootContainer.Children.Select(c => c.Color).ToList();
+            } else if (_currentActiveContainer != null) {
+                usedColors = _currentActiveContainer.Children.Select(c => c.Color).ToList();
+            }
+
+            // Get a random color that hasn't been used yet (if possible)
+            var colorScheme = AppConfig.GetRandomBoxColor(usedColors);
+
             // Create a new container with default properties
             var newBox = new StorageContainer {
                 Name = "Box_" + Guid.NewGuid().ToString("N").Substring(0, 8),
                 Position = new[] { gridX, gridY },
                 Size = new[] { 1, 1 },
-                Color = "#808080", // Default gray color
+                Color = colorScheme.Background,
                 Depth = _currentDepth // Always use the current depth level
             };
 
