@@ -61,9 +61,6 @@
   <data name="Str_NewCategory" xml:space="preserve" id="d037c476-346c-4c13-b0d8-8908c5523820">
     <value>New Category</value>
   </data>
-  <data name="Str_Back" xml:space="preserve" id="5ee31d88-5702-4490-a0ad-a55482dc223e">
-    <value>Back</value>
-  </data>
   <data name="Str_SearchPlaceholder" xml:space="preserve" id="c3fe2510-a48b-4d0d-961b-3ed5c213156d">
     <value>Search...</value>
   </data>
@@ -90,21 +87,6 @@
   </data>
   <data name="Str_Settings" xml:space="preserve" id="9945b8a0-4055-41ba-bebc-6d1784d78f17">
     <value>Settings</value>
-  </data>
-  <data name="Str_Component" xml:space="preserve" id="88a114e7-d149-4f62-ae36-74f05c08bf26">
-    <value>Component</value>
-  </data>
-  <data name="Str_ModelNumber" xml:space="preserve" id="44970acd-f0b8-4f5b-8db6-56bf17af0ae7">
-    <value>Model Number</value>
-  </data>
-  <data name="Str_Datasheet" xml:space="preserve" id="8278f5c2-bbc2-4757-9a32-210b9b3ffc2d">
-    <value>Datasheet</value>
-  </data>
-  <data name="Str_Type" xml:space="preserve" id="2978f1d3-3dc6-49dd-b0f0-e105dc0bc871">
-    <value>Type</value>
-  </data>
-  <data name="Str_Value" xml:space="preserve" id="b171432c-2a9e-42b9-a229-75543d32b811">
-    <value>Value</value>
   </data>
   <data name="Str_Qty" xml:space="preserve" id="79bccda1-1ffa-4483-8ba9-689a4522438a">
     <value>Qty</value>
@@ -163,12 +145,6 @@
   <data name="Str_MergeMsg" xml:space="preserve" id="3d0ac2a5-c3c6-46a2-a45a-f30d87873ca7">
     <value>Do you want to merge the items from '{0}' into '{1}'?\n\n'{0}' will be removed.</value>
   </data>
-  <data name="Str_MergeSuccessTitle" xml:space="preserve" id="5fa738a2-a6a4-4f57-9ee0-8d391f8e64ff">
-    <value>Merge Successful</value>
-  </data>
-  <data name="Str_MergeSuccessMsg" xml:space="preserve" id="dc99ce93-5180-4b4b-85e5-c72a3099dc20">
-    <value>Merged items into '{0}'.</value>
-  </data>
   <data name="Str_DeleteCategory" xml:space="preserve" id="3ab774b6-2f2e-4bbc-8f2a-72695f8e98f3">
     <value>Delete Category</value>
   </data>
@@ -180,9 +156,6 @@
   </data>
   <data name="Str_EnterCategoryName" xml:space="preserve" id="d7b943bf-48d9-4f2f-9f4b-610f7d6c9c7e">
     <value>Enter category name:</value>
-  </data>
-  <data name="Str_NewCategoryTitle" xml:space="preserve" id="8300bedd-cdbd-4304-8cfe-490ac22c31f6">
-    <value>New Category</value>
   </data>
   <data name="Str_BoxStructureUpdated" xml:space="preserve" id="75d7f291-aa8c-4e32-906a-9089260f8cee">
     <value>Box Structure Updated</value>
@@ -205,17 +178,11 @@
   <data name="Str_SettingsNotImplemented" xml:space="preserve" id="ce27963d-8659-4e75-aca8-4f0b33f0c7fe">
     <value>Settings for {0} are not yet implemented.</value>
   </data>
-  <data name="Str_CannotDeleteDefault" xml:space="preserve" id="bac74686-fadc-48e8-8748-21b546dff7fd">
-    <value>Cannot delete the default 'Electronics' category.</value>
-  </data>
   <data name="Str_SaveSuccess" xml:space="preserve" id="c1935caf-d5bf-4774-8a4e-2032779abdb6">
     <value>Changes saved successfully.</value>
   </data>
   <data name="Str_LinkError" xml:space="preserve" id="b162177d-584a-4555-ae70-39c88232a96e">
     <value>Could not open link: {0}</value>
-  </data>
-  <data name="Str_LoadError" xml:space="preserve" id="2f950170-c00c-432a-a9fb-938e230cabe7">
-    <value>Failed to load storage data.</value>
   </data>
   <data name="Str_NoDataToSave" xml:space="preserve" id="48259a69-3bcc-481a-afdb-db0cc6a9d3df">
     <value>No data to save.</value>
@@ -241,20 +208,11 @@
   <data name="Str_Filters" xml:space="preserve" id="c088bb4c-8e58-4cff-a698-fd3eb37b54e3">
     <value>Filters</value>
   </data>
-  <data name="Str_Category" xml:space="preserve" id="1b8eda36-c3d8-42fe-a0bf-4ca78bbf139c">
-    <value>Category</value>
-  </data>
-  <data name="Str_ClearFilters" xml:space="preserve" id="46c274e4-91ca-414d-9c64-a9d24c450d7d">
-    <value>Clear Filters</value>
-  </data>
   <data name="Str_ManageCategories" xml:space="preserve" id="52f8db0f-ad9f-4a1d-add5-9d39174c3bcc">
     <value>Manage Categories</value>
   </data>
   <data name="Str_CreateNewModel" xml:space="preserve" id="e729c780-0ee7-48ee-8fb7-624fded93a92">
     <value>Create New Model</value>
-  </data>
-  <data name="Str_ImportCommonParts" xml:space="preserve" id="72a22e7c-3aca-4fb7-ac2f-405ab4be6179">
-    <value>Import Common Parts</value>
   </data>
   <data name="Str_SearchModelPlaceholder" xml:space="preserve" id="a0731270-9e9a-4d7a-bb00-ea43f6f113dc">
     <value>Search Model...</value>
@@ -280,26 +238,8 @@
   <data name="Str_Create" xml:space="preserve" id="d442fcae-a559-49c6-83bd-f8df1483acc2">
     <value>Create</value>
   </data>
-  <data name="Str_AllCategories" xml:space="preserve" id="a290a031-954a-4560-8d3d-4cd8e9cf470b">
-    <value>All Categories</value>
-  </data>
   <data name="Str_ModelExists" xml:space="preserve" id="af82d852-54d2-42b3-9062-188a004f67d2">
     <value>Model already exists.</value>
-  </data>
-  <data name="Str_ImportConfirmMsg" xml:space="preserve" id="fd276752-4b22-4ab4-8719-90970cd95a68">
-    <value>This will import common electronic components (Resistors, Capacitors, LEDs, ICs) into your database. Existing models with the same number will be skipped.\n\nContinue?</value>
-  </data>
-  <data name="Str_ImportDatabase" xml:space="preserve" id="9ca84980-c9e9-4663-a8f7-1505b5688465">
-    <value>Import Database</value>
-  </data>
-  <data name="Str_ImportSuccessMsg" xml:space="preserve" id="ca433d44-ed5a-4277-ab17-0aaf503709ee">
-    <value>Successfully imported {0} new models and updated categories.</value>
-  </data>
-  <data name="Str_ImportComplete" xml:space="preserve" id="b4e297f2-2040-4ade-9dab-8069b72c14ea">
-    <value>Import Complete</value>
-  </data>
-  <data name="Str_ImportNoNewMsg" xml:space="preserve" id="75ee253a-6291-416f-b29c-0e4cfb13893c">
-    <value>No new models were added (all already exist). Categories updated.</value>
   </data>
   <data name="Str_ConfirmDeleteModel" xml:space="preserve" id="454e1e77-9f4a-487e-9fed-d06bd640e0dc">
     <value>Are you sure you want to delete model {0}?</value>

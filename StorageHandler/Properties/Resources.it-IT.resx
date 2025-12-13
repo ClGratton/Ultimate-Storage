@@ -61,9 +61,6 @@
   <data name="Str_NewCategory" xml:space="preserve" id="71feb2c4-0947-454e-a83c-de69371a6996">
     <value>Nuova Categoria</value>
   </data>
-  <data name="Str_Back" xml:space="preserve" id="756919b2-3296-4c62-bee2-077c66e50494">
-    <value>Indietro</value>
-  </data>
   <data name="Str_SearchPlaceholder" xml:space="preserve" id="5ccda9f5-ffb8-4b55-a711-2975995b3236">
     <value>Cerca...</value>
   </data>
@@ -90,21 +87,6 @@
   </data>
   <data name="Str_Settings" xml:space="preserve" id="5915a277-4776-4432-a515-327d3e30684a">
     <value>Impostazioni</value>
-  </data>
-  <data name="Str_Component" xml:space="preserve" id="5f9ee4cb-142e-4592-ab5c-1ef93a1ec413">
-    <value>Componente</value>
-  </data>
-  <data name="Str_ModelNumber" xml:space="preserve" id="6a73e9cb-acc9-4445-9995-1f52cf9f2adc">
-    <value>Modello</value>
-  </data>
-  <data name="Str_Datasheet" xml:space="preserve" id="cc5f8b45-493d-4311-8202-873ba516605b">
-    <value>Datasheet</value>
-  </data>
-  <data name="Str_Type" xml:space="preserve" id="6cc51883-9cce-481f-b3dc-2ad3e8f6552c">
-    <value>Tipo</value>
-  </data>
-  <data name="Str_Value" xml:space="preserve" id="ea0f5b45-b1d8-4aea-abb1-bff42a9cd03b">
-    <value>Valore</value>
   </data>
   <data name="Str_Qty" xml:space="preserve" id="eb376b16-47eb-46fd-961b-f0a492c90677">
     <value>Qta</value>
@@ -163,12 +145,6 @@
   <data name="Str_MergeMsg" xml:space="preserve" id="27cdca4b-135c-406f-aa54-b8261e6832dd">
     <value>Vuoi unire gli oggetti da '{0}' in '{1}'?\n\n'{0}' verrà rimosso.</value>
   </data>
-  <data name="Str_MergeSuccessTitle" xml:space="preserve" id="39eddb73-70bb-4875-a9fe-21f4059a9b7a">
-    <value>Unione Riuscita</value>
-  </data>
-  <data name="Str_MergeSuccessMsg" xml:space="preserve" id="241cf989-f4d8-4725-897b-8a48a3d60d2f">
-    <value>Oggetti uniti in '{0}'.</value>
-  </data>
   <data name="Str_DeleteCategory" xml:space="preserve" id="6e168c76-a3e6-4171-85ba-50d0c00560d9">
     <value>Elimina Categoria</value>
   </data>
@@ -180,9 +156,6 @@
   </data>
   <data name="Str_EnterCategoryName" xml:space="preserve" id="1ed3d7f7-d067-4380-8999-118bb2d604df">
     <value>Inserisci nome categoria:</value>
-  </data>
-  <data name="Str_NewCategoryTitle" xml:space="preserve" id="972dd352-2ebf-445a-84f9-faca3b07041a">
-    <value>Nuova Categoria</value>
   </data>
   <data name="Str_BoxStructureUpdated" xml:space="preserve" id="0099a81d-b8ed-48e4-aab2-316510062306">
     <value>Struttura Scatole Aggiornata</value>
@@ -205,17 +178,11 @@
   <data name="Str_SettingsNotImplemented" xml:space="preserve" id="bfa64320-7f93-4664-8d6d-6a205136ac37">
     <value>Le impostazioni per {0} non sono ancora implementate.</value>
   </data>
-  <data name="Str_CannotDeleteDefault" xml:space="preserve" id="599a41a1-6b07-4f03-af19-917eacf4ff5e">
-    <value>Impossibile eliminare la categoria predefinita 'Electronics'.</value>
-  </data>
   <data name="Str_SaveSuccess" xml:space="preserve" id="6751069b-028f-4d5f-ac89-4e921c9c86f9">
     <value>Modifiche salvate con successo.</value>
   </data>
   <data name="Str_LinkError" xml:space="preserve" id="14f0bc68-2fdb-4731-b565-b1c4465944d5">
     <value>Impossibile aprire il link: {0}</value>
-  </data>
-  <data name="Str_LoadError" xml:space="preserve" id="25d79525-94e5-4244-93a2-d86d41ed6e28">
-    <value>Impossibile caricare i dati di archiviazione.</value>
   </data>
   <data name="Str_NoDataToSave" xml:space="preserve" id="317df5d3-d1fc-4c41-8cf7-ef39492cfa56">
     <value>Nessun dato da salvare.</value>
@@ -241,20 +208,11 @@
   <data name="Str_Filters" xml:space="preserve" id="9ecf5790-9e67-4adb-b25a-f300538f3ba4">
     <value>Filtri</value>
   </data>
-  <data name="Str_Category" xml:space="preserve" id="b3aeae4f-3d7b-40ff-bd27-38906fe15207">
-    <value>Categoria</value>
-  </data>
-  <data name="Str_ClearFilters" xml:space="preserve" id="56c342a9-05db-44b0-b54b-081b00b2b401">
-    <value>Pulisci Filtri</value>
-  </data>
   <data name="Str_ManageCategories" xml:space="preserve" id="1e3cdf6f-9cd5-44c3-b41c-30d9898e79d5">
     <value>Gestisci Categorie</value>
   </data>
   <data name="Str_CreateNewModel" xml:space="preserve" id="9bcab193-f44a-44da-8b24-11d4bc533073">
     <value>Crea Nuovo Modello</value>
-  </data>
-  <data name="Str_ImportCommonParts" xml:space="preserve" id="746eae77-3855-4444-b983-15b3f3b72a1a">
-    <value>Importa Parti Comuni</value>
   </data>
   <data name="Str_SearchModelPlaceholder" xml:space="preserve" id="40fe718d-758a-4c1e-a770-2fe29b8b306a">
     <value>Cerca Modello...</value>
@@ -280,26 +238,8 @@
   <data name="Str_Create" xml:space="preserve" id="62159a0e-5e43-4b7d-8038-c27c5b2ae661">
     <value>Crea</value>
   </data>
-  <data name="Str_AllCategories" xml:space="preserve" id="841e2109-6142-4e0f-b9ac-4e4286009bf4">
-    <value>Tutte le Categorie</value>
-  </data>
   <data name="Str_ModelExists" xml:space="preserve" id="40468334-33b4-4391-8743-0a71e6793cba">
     <value>Il modello esiste già.</value>
-  </data>
-  <data name="Str_ImportConfirmMsg" xml:space="preserve" id="eced418b-2697-4be4-b0c1-3df580b254b4">
-    <value>Questo importerà componenti elettronici comuni (Resistori, Condensatori, LED, IC) nel tuo database. I modelli esistenti con lo stesso numero verranno saltati.\n\nContinuare?</value>
-  </data>
-  <data name="Str_ImportDatabase" xml:space="preserve" id="fca16234-cde7-46f2-a52d-f9cc57783dd9">
-    <value>Importa Database</value>
-  </data>
-  <data name="Str_ImportSuccessMsg" xml:space="preserve" id="671a8757-b066-4f22-8dc3-46a4bed2c40b">
-    <value>Importati con successo {0} nuovi modelli e aggiornate le categorie.</value>
-  </data>
-  <data name="Str_ImportComplete" xml:space="preserve" id="25bb8ea5-0a8e-4ef7-9ae1-804fd4448a98">
-    <value>Importazione Completata</value>
-  </data>
-  <data name="Str_ImportNoNewMsg" xml:space="preserve" id="f843e25e-2a3c-4531-933b-ad236549b471">
-    <value>Nessun nuovo modello aggiunto (tutti già esistenti). Categorie aggiornate.</value>
   </data>
   <data name="Str_ConfirmDeleteModel" xml:space="preserve" id="95634e4a-78a7-421e-932d-e9420063c717">
     <value>Sei sicuro di voler eliminare il modello {0}?</value>

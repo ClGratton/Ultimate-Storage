@@ -61,7 +61,6 @@ namespace StorageHandler.Properties {
         }
         
         public static string Str_NewCategory { get { return ResourceManager.GetString("Str_NewCategory", resourceCulture); } }
-        public static string Str_Back { get { return ResourceManager.GetString("Str_Back", resourceCulture); } }
         public static string Str_SearchPlaceholder { get { return ResourceManager.GetString("Str_SearchPlaceholder", resourceCulture); } }
         public static string Str_Undo { get { return ResourceManager.GetString("Str_Undo", resourceCulture); } }
         public static string Str_Save { get { return ResourceManager.GetString("Str_Save", resourceCulture); } }
@@ -71,11 +70,6 @@ namespace StorageHandler.Properties {
         public static string Str_Maximize { get { return ResourceManager.GetString("Str_Maximize", resourceCulture); } }
         public static string Str_Restore { get { return ResourceManager.GetString("Str_Restore", resourceCulture); } }
         public static string Str_Settings { get { return ResourceManager.GetString("Str_Settings", resourceCulture); } }
-        public static string Str_Component { get { return ResourceManager.GetString("Str_Component", resourceCulture); } }
-        public static string Str_ModelNumber { get { return ResourceManager.GetString("Str_ModelNumber", resourceCulture); } }
-        public static string Str_Datasheet { get { return ResourceManager.GetString("Str_Datasheet", resourceCulture); } }
-        public static string Str_Type { get { return ResourceManager.GetString("Str_Type", resourceCulture); } }
-        public static string Str_Value { get { return ResourceManager.GetString("Str_Value", resourceCulture); } }
         public static string Str_Qty { get { return ResourceManager.GetString("Str_Qty", resourceCulture); } }
         public static string Str_Description { get { return ResourceManager.GetString("Str_Description", resourceCulture); } }
         public static string Str_AddItem { get { return ResourceManager.GetString("Str_AddItem", resourceCulture); } }
@@ -94,13 +88,10 @@ namespace StorageHandler.Properties {
         public static string Str_BoxInItemListError { get { return ResourceManager.GetString("Str_BoxInItemListError", resourceCulture); } }
         public static string Str_MergeTitle { get { return ResourceManager.GetString("Str_MergeTitle", resourceCulture); } }
         public static string Str_MergeMsg { get { return ResourceManager.GetString("Str_MergeMsg", resourceCulture); } }
-        public static string Str_MergeSuccessTitle { get { return ResourceManager.GetString("Str_MergeSuccessTitle", resourceCulture); } }
-        public static string Str_MergeSuccessMsg { get { return ResourceManager.GetString("Str_MergeSuccessMsg", resourceCulture); } }
         public static string Str_DeleteCategory { get { return ResourceManager.GetString("Str_DeleteCategory", resourceCulture); } }
         public static string Str_ConfirmDeleteCategory { get { return ResourceManager.GetString("Str_ConfirmDeleteCategory", resourceCulture); } }
         public static string Str_CategoryExists { get { return ResourceManager.GetString("Str_CategoryExists", resourceCulture); } }
         public static string Str_EnterCategoryName { get { return ResourceManager.GetString("Str_EnterCategoryName", resourceCulture); } }
-        public static string Str_NewCategoryTitle { get { return ResourceManager.GetString("Str_NewCategoryTitle", resourceCulture); } }
         public static string Str_BoxStructureUpdated { get { return ResourceManager.GetString("Str_BoxStructureUpdated", resourceCulture); } }
         public static string Str_BoxChildSuccess { get { return ResourceManager.GetString("Str_BoxChildSuccess", resourceCulture); } }
         public static string Str_CircularRefError { get { return ResourceManager.GetString("Str_CircularRefError", resourceCulture); } }
@@ -108,10 +99,8 @@ namespace StorageHandler.Properties {
         public static string Str_MakeChildBoxMsg { get { return ResourceManager.GetString("Str_MakeChildBoxMsg", resourceCulture); } }
         public static string Str_MakeChildBoxMsgDetails { get { return ResourceManager.GetString("Str_MakeChildBoxMsgDetails", resourceCulture); } }
         public static string Str_SettingsNotImplemented { get { return ResourceManager.GetString("Str_SettingsNotImplemented", resourceCulture); } }
-        public static string Str_CannotDeleteDefault { get { return ResourceManager.GetString("Str_CannotDeleteDefault", resourceCulture); } }
         public static string Str_SaveSuccess { get { return ResourceManager.GetString("Str_SaveSuccess", resourceCulture); } }
         public static string Str_LinkError { get { return ResourceManager.GetString("Str_LinkError", resourceCulture); } }
-        public static string Str_LoadError { get { return ResourceManager.GetString("Str_LoadError", resourceCulture); } }
         public static string Str_NoDataToSave { get { return ResourceManager.GetString("Str_NoDataToSave", resourceCulture); } }
         public static string Str_MergeError { get { return ResourceManager.GetString("Str_MergeError", resourceCulture); } }
         public static string Str_Box { get { return ResourceManager.GetString("Str_Box", resourceCulture); } }
@@ -120,11 +109,8 @@ namespace StorageHandler.Properties {
         public static string Str_OK { get { return ResourceManager.GetString("Str_OK", resourceCulture); } }
         public static string Str_SelectComponent { get { return ResourceManager.GetString("Str_SelectComponent", resourceCulture); } }
         public static string Str_Filters { get { return ResourceManager.GetString("Str_Filters", resourceCulture); } }
-        public static string Str_Category { get { return ResourceManager.GetString("Str_Category", resourceCulture); } }
-        public static string Str_ClearFilters { get { return ResourceManager.GetString("Str_ClearFilters", resourceCulture); } }
         public static string Str_ManageCategories { get { return ResourceManager.GetString("Str_ManageCategories", resourceCulture); } }
         public static string Str_CreateNewModel { get { return ResourceManager.GetString("Str_CreateNewModel", resourceCulture); } }
-        public static string Str_ImportCommonParts { get { return ResourceManager.GetString("Str_ImportCommonParts", resourceCulture); } }
         public static string Str_SearchModelPlaceholder { get { return ResourceManager.GetString("Str_SearchModelPlaceholder", resourceCulture); } }
         public static string Str_Add { get { return ResourceManager.GetString("Str_Add", resourceCulture); } }
         public static string Str_ComponentCategory { get { return ResourceManager.GetString("Str_ComponentCategory", resourceCulture); } }
@@ -133,13 +119,7 @@ namespace StorageHandler.Properties {
         public static string Str_TypePrompt { get { return ResourceManager.GetString("Str_TypePrompt", resourceCulture); } }
         public static string Str_ValuePrompt { get { return ResourceManager.GetString("Str_ValuePrompt", resourceCulture); } }
         public static string Str_Create { get { return ResourceManager.GetString("Str_Create", resourceCulture); } }
-        public static string Str_AllCategories { get { return ResourceManager.GetString("Str_AllCategories", resourceCulture); } }
         public static string Str_ModelExists { get { return ResourceManager.GetString("Str_ModelExists", resourceCulture); } }
-        public static string Str_ImportConfirmMsg { get { return ResourceManager.GetString("Str_ImportConfirmMsg", resourceCulture); } }
-        public static string Str_ImportDatabase { get { return ResourceManager.GetString("Str_ImportDatabase", resourceCulture); } }
-        public static string Str_ImportSuccessMsg { get { return ResourceManager.GetString("Str_ImportSuccessMsg", resourceCulture); } }
-        public static string Str_ImportComplete { get { return ResourceManager.GetString("Str_ImportComplete", resourceCulture); } }
-        public static string Str_ImportNoNewMsg { get { return ResourceManager.GetString("Str_ImportNoNewMsg", resourceCulture); } }
         public static string Str_ConfirmDeleteModel { get { return ResourceManager.GetString("Str_ConfirmDeleteModel", resourceCulture); } }
         public static string Str_InvalidQty { get { return ResourceManager.GetString("Str_InvalidQty", resourceCulture); } }
         public static string Str_InvalidQtyTitle { get { return ResourceManager.GetString("Str_InvalidQtyTitle", resourceCulture); } }
