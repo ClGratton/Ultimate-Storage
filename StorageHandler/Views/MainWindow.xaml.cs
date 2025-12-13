@@ -710,7 +710,7 @@ namespace StorageHandler.Views {
             }
 
             // Get a random color that hasn't been used yet (if possible)
-            var colorScheme = AppConfig.GetRandomBoxColor(usedColors);
+            var colorScheme = ColorHelper.GetRandomBoxColor(usedColors);
 
             // Create a new container with default properties
             var newBox = new StorageContainer {

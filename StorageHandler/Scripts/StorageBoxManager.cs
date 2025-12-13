@@ -72,7 +72,7 @@ namespace StorageHandler.Scripts {
             outerBorder.Child = box;
             var finalBox = outerBorder;
 
-            var textColor = AppConfig.GetTextColorForBackground(container.Color);
+            var textColor = ColorHelper.GetTextColorForBackground(container.Color);
             var nameText = new TextBlock {
                 Text = container.Name,
                 Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(textColor)),

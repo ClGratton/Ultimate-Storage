@@ -35,11 +35,6 @@ namespace StorageHandler.Scripts {
                 Application.Current.Shutdown();
             }
         }
-
-
-        public StorageContainer? GetCurrentStorage() {
-            return _rootContainer;
-        }
     }
 }
 

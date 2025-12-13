@@ -29,8 +29,8 @@ namespace StorageHandler.Views {
 
         private void LoadPresetColors() {
             var colorSchemes = AppConfig.BoxColorSchemes.Select(scheme => new {
-                Background = scheme.Background,
-                Text = scheme.Text
+                scheme.Background,
+                scheme.Text
             }).ToList();
 
             PresetColorsPanel.ItemsSource = colorSchemes;
