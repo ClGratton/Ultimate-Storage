@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using System.Text.Json;
 using System.Diagnostics;
+using StorageHandler.Config.Options;
+using StorageHandler.Config.Constants;
 
 namespace StorageHandler.Config {
     public static class ConfigManager {
         //Initialization of dynamic variables
-        private static readonly string ConfigFileName = "userconfig.json";
-        private static readonly string ConfigPath = Path.Combine(AppContext.BaseDirectory, ConfigFileName);
-        
-        private static readonly string StateFileName = "appstate.json";
-        private static readonly string StatePath = Path.Combine(AppContext.BaseDirectory, StateFileName);
+        private static readonly string ConfigPath = Path.Combine(AppContext.BaseDirectory, AppConfig.ConfigFileName);
+        private static readonly string StatePath = Path.Combine(AppContext.BaseDirectory, AppConfig.StateFileName);
 
         public static UserConfig Current { get; private set; } = new UserConfig();
         public static AppState State { get; private set; } = new AppState();
@@ -18,18 +17,17 @@ namespace StorageHandler.Config {
         public static string StorageDirectory {
             get {
                 var path = Current.StorageFolderPath;
-                if (string.IsNullOrWhiteSpace(path)) {
+                if (string.IsNullOrWhiteSpace(path)) {                                       // Fallback to default if not set by user
                     path = AppConfig.DefaultStoragePath;
                 }
                 
-                if (Path.IsPathRooted(path)) {
+                if (Path.IsPathRooted(path)) {                                               // Path is absolute 
                     return path;
-                } else {
-                    return Path.Combine(AppContext.BaseDirectory, path);
+                } else {                                                                     // Path is relative to application directory 
+                    return Path.Combine(AppContext.BaseDirectory, path);    
                 }
             }
         }
-
         public static void LoadConfig() {
             if (File.Exists(ConfigPath)) {
                 try {

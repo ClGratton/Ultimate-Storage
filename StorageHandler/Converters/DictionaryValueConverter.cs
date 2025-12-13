@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Data;
 
-namespace StorageHandler.Scripts {
+namespace StorageHandler.Converters {
     public class DictionaryValueConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value is Dictionary<string, string> dict && parameter is string key) {

@@ -1,8 +1,9 @@
 //only DYNAMIC user-specific configuration should go here.
 
 using System.Text.Json.Serialization;
+using StorageHandler.Config.Constants;
 
-namespace StorageHandler.Config {
+namespace StorageHandler.Config.Options {
     public class UserConfig {
         [JsonPropertyName("language")]
         public string Language { get; set; } = "en-US";  //en-US or it-IT

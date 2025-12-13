@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 using StorageHandler.Models;
 
-namespace StorageHandler.Scripts {
+namespace StorageHandler.Utilities {
     public static class ApiEmulator {
         public static void GenerateTestFiles(string databaseRoot) {
             string componentsDir = Path.Combine(databaseRoot, "Components");

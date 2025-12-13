@@ -1,7 +1,11 @@
 // Only STATIC configuration constants should go here.
 
-namespace StorageHandler.Config {
+namespace StorageHandler.Config.Constants {
     public static class AppConfig {
+        // Configuration File Names
+        public const string ConfigFileName = "userconfig.json";
+        public const string StateFileName = "appstate.json";
+
         //Windows Constants
         public const double DefaultWindowWidth = 920;
         public const double DefaultWindowHeight = 600;
@@ -40,7 +44,7 @@ namespace StorageHandler.Config {
         public const int MaxIdGenerationLimit = 99999;
 
         // Theme Colors (Background, Text)
-        public static readonly (string Background, string Text)[] BoxColorSchemes = new[] {
+        public static readonly (string Background, string Text)[] BoxColorSchemes = {
             ("#FFD6A5", "#000000"), // peach - black text
             ("#FFADAD", "#000000"), // light coral - black text
             ("#FFD6FF", "#000000"), // light pink - black text

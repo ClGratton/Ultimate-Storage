@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using StorageHandler.Config;
+using StorageHandler.Config.Constants;
+using StorageHandler.Utilities;
 using StorageHandler.Scripts;
 
 namespace StorageHandler {

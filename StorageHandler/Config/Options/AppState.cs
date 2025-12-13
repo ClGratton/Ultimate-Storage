@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
+using StorageHandler.Config.Constants;
 
-namespace StorageHandler.Config {
+namespace StorageHandler.Config.Options {
     public class AppState {
         [JsonPropertyName("windowWidth")]
         public double WindowWidth { get; set; } = AppConfig.DefaultWindowWidth;

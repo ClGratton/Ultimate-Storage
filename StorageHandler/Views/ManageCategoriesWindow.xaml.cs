@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using StorageHandler.Models;
-using StorageHandler.Scripts;
+using StorageHandler.Helpers;
 
 namespace StorageHandler.Views {
     public partial class ManageCategoriesWindow : Window {

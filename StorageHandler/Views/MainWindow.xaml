@@ -4,8 +4,8 @@
        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:StorageHandler"
-       xmlns:scripts="clr-namespace:StorageHandler.Scripts"
-       xmlns:config="clr-namespace:StorageHandler.Config"
+       xmlns:converters="clr-namespace:StorageHandler.Converters"
+       xmlns:config="clr-namespace:StorageHandler.Config.Constants"
        xmlns:p="clr-namespace:StorageHandler.Properties"
        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
        mc:Ignorable="d"
@@ -17,9 +17,9 @@
        StateChanged="Window_StateChanged">
 
     <Window.Resources>
-        <scripts:UrlToVisibilityConverter x:Key="UrlToVisibilityConverter"/>
-        <scripts:NotUrlToVisibilityConverter x:Key="NotUrlToVisibilityConverter"/>
-        <scripts:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
+        <converters:UrlToVisibilityConverter x:Key="UrlToVisibilityConverter"/>
+        <converters:NotUrlToVisibilityConverter x:Key="NotUrlToVisibilityConverter"/>
+        <converters:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
         
         <Style x:Key="MenuButtonTheme" TargetType="RadioButton">
             <Setter Property="Margin" Value="0,0,0,5"/>

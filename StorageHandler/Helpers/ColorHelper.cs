@@ -1,9 +1,9 @@
-using StorageHandler.Config;
+using StorageHandler.Config.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace StorageHandler.Scripts {
+namespace StorageHandler.Helpers {
     public static class ColorHelper {
         private static readonly Random _random = new Random();
 

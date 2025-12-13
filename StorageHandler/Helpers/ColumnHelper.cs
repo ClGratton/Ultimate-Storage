@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using StorageHandler.Models;
-using StorageHandler.Config;
+using StorageHandler.Config.Constants;
 
-namespace StorageHandler.Scripts {
+namespace StorageHandler.Helpers {
     public static class ColumnHelper {
         
         private static Dictionary<string, List<string>> _cache = new Dictionary<string, List<string>>();

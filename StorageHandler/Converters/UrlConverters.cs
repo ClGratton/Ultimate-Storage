@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace StorageHandler.Scripts {
+namespace StorageHandler.Converters {
     public class UrlToVisibilityConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value is string str && !string.IsNullOrEmpty(str)) {

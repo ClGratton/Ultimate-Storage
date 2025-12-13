@@ -8,7 +8,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using StorageHandler.Models;
 using StorageHandler.Scripts;
-using StorageHandler.Config;
+using StorageHandler.Config.Constants;
+using StorageHandler.Helpers;
 
 namespace StorageHandler.Views {
     public partial class ItemSelectionWindow : Window {

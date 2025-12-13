@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using StorageHandler.Config;
+using StorageHandler.Config.Constants;
 using StorageHandler.Models;
 
 namespace StorageHandler.Views {
